@@ -3,4 +3,9 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="white">#FFFFFF</color>
+    <color name="background_voilet">#453186</color>
+    <color name="orange">#453186</color>
+    <color name="yellow">#EFAE3D</color>
+    <color name="app_theme_color">#3B3A43</color>
 </resources>
