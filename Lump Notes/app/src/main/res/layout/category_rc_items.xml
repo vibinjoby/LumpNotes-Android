@@ -3,7 +3,10 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:descendantFocusability="blocksDescendants">
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?android:attr/selectableItemBackground">
+
 
     <ImageView
         android:id="@+id/category_ic_border"
@@ -13,6 +16,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/curved_view"/>
     <Button
+        android:id="@+id/menuBtn"
         android:layout_width="18dp"
         android:layout_height="18dp"
         android:layout_marginTop="10dp"
