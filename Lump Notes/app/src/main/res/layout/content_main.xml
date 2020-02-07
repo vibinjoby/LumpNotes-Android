@@ -37,7 +37,7 @@
         android:id="@+id/category_searchbtn"
         android:layout_width="18dp"
         android:layout_height="18dp"
-        android:background="@drawable/search"
+        android:background="@raw/search"
         android:layout_alignRight="@id/category_search_txt"
         android:layout_marginRight="20dp"
         android:layout_marginTop="110dp"/>
@@ -95,7 +95,7 @@
         android:layout_height="25dp"
         android:layout_marginTop="8dp"
         android:layout_marginRight="10dp"
-        android:background="@drawable/sort_ic_img"
+        android:background="@raw/sort_ic_img"
         android:layout_alignTop="@id/notes_view"
         android:layout_alignRight="@id/notes_view"/>
 
@@ -120,7 +120,7 @@
         android:id="@+id/notes_searchbtn"
         android:layout_width="18dp"
         android:layout_height="18dp"
-        android:background="@drawable/search"
+        android:background="@raw/search"
         android:layout_marginTop="10dp"
         android:layout_alignRight="@id/notes_search_txt"
         android:layout_alignTop="@id/notes_search_txt"

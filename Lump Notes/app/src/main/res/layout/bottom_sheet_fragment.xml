@@ -2,8 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/rounded_edge_view">
+    android:layout_height="wrap_content">
     <TextView
         android:id="@+id/headerTxt"
         android:layout_width="wrap_content"
@@ -29,61 +28,10 @@
         android:text="X"
         android:textSize="15dp"/>
 
-    <ImageView
-        android:id="@+id/newCtgryIc"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/rounded_view"
+    <ListView
+        android:id="@+id/selectionList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/headerTxt"
-        app:layout_constraintLeft_toLeftOf="@id/headerTxt"
-        android:src="@drawable/new_category"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Category"
-        app:layout_constraintLeft_toRightOf="@id/newCtgryIc"
-        app:layout_constraintTop_toTopOf="@id/newCtgryIc"
-        android:layout_marginLeft="50dp"
-        android:textSize="15dp"
-        android:textColor="#333232"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#c0c0c0"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        app:layout_constraintTop_toBottomOf="@id/newCtgryIc"/>
-
-    <ImageView
-        android:id="@+id/newNoteIc"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="40dp"
-        android:background="@drawable/rounded_view"
-        app:layout_constraintTop_toBottomOf="@id/newCtgryIc"
-        app:layout_constraintLeft_toLeftOf="@id/newCtgryIc"
-        android:src="@drawable/new_note"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Note"
-        app:layout_constraintLeft_toRightOf="@id/newNoteIc"
-        app:layout_constraintTop_toTopOf="@id/newNoteIc"
-        android:layout_marginLeft="50dp"
-        android:textSize="15dp"
-        android:textColor="#333232"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#c0c0c0"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        app:layout_constraintTop_toBottomOf="@id/newNoteIc"/>
-
+        app:layout_constraintLeft_toLeftOf="@id/headerTxt"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
