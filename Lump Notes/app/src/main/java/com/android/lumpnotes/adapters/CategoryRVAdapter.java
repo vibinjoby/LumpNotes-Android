@@ -94,6 +94,14 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 }
             });
 
+            ((AddCategoryVH) holder).itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag();
+                    dialog.show(fragmentManager,dialog.getTag());
+                }
+            });
+
         } else {
             ((CategoryVH) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
