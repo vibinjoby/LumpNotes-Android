@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        String categoryArr[] = {};
+        String categoryArr[] = {"Shopping", "Travel", "Education", "School", "Washing"};
 
         //Initializing the elements from the view
         categoryRV = findViewById(R.id.category_rv);
