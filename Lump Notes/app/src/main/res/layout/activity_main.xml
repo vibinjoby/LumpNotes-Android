@@ -98,6 +98,18 @@
                 android:layout_marginRight="10dp"
                 android:background="@raw/sort_ic_img" />
 
+            <include
+                android:id="@+id/default_note"
+                layout="@layout/default_note"
+                android:layout_marginLeft="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginTop="40dp" />
+
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 
@@ -173,17 +185,6 @@
         android:layout_marginTop="40dp"
         android:elevation="20dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-    <include
-        android:id="@+id/default_note"
-        layout="@layout/default_note"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/notes_view"
-        android:layout_alignTop="@id/notes_search_txt"
-        android:layout_alignRight="@id/notes_view"
-        android:layout_alignBottom="@id/notes_view"
-        android:layout_marginTop="40dp" />
 
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
