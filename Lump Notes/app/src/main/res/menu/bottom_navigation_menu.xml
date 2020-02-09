@@ -9,13 +9,11 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/pinned"
-        android:enabled="true"
         android:icon="@raw/bookmark"
         android:title="Pinned"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/bin"
-        android:enabled="true"
         android:icon="@raw/bin"
         android:title="Trash"
         app:showAsAction="ifRoom" />

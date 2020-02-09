@@ -8,14 +8,18 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.fragment.app.FragmentManager;
+
 import com.android.lumpnotes.R;
 
 public class BottomSelectionLVAdapter extends BaseAdapter {
     String[] selectionArr;
     Context context;
-    public BottomSelectionLVAdapter(String[] selectionArr,Context context) {
+    FragmentManager fragManager;
+    public BottomSelectionLVAdapter(String[] selectionArr,Context context,FragmentManager fragManager) {
         this.selectionArr = selectionArr;
         this.context = context;
+        this.fragManager = fragManager;
     }
     @Override
     public int getCount() {

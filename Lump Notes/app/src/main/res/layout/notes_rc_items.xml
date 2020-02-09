@@ -9,8 +9,8 @@
 
     <ImageView
         android:id="@+id/notes_ic_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="43dp"
+        android:layout_height="43dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         android:padding="10dp"

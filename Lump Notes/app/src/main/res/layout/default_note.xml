@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#4B4B4B"
+        android:textSize="19dp"
+        android:fontFamily="@font/helvetica_neue_medium"
+        android:text="Documentation makes life better"/>
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Tap the bottom right button to create a note."
+    android:textSize="12dp"
+    android:layout_gravity="center"
+    android:layout_marginTop="12dp"
+    android:textColor="#777474"/>
+
+    <ImageView
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@raw/notes"/>
+
+</LinearLayout>
