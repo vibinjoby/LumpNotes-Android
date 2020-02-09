@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="10dp"
+    app:cardMaxElevation="12dp"
+    app:cardCornerRadius="10dp">
 
     <ImageView
         android:id="@+id/defaultCatgry_ic_border"
@@ -17,10 +19,8 @@
         android:id="@+id/add_category_btn"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:background="@drawable/rounded_plus_button_brown"
-        app:layout_constraintLeft_toLeftOf="@id/defaultCatgry_ic_border"
+        android:background="@drawable/round_plus_button_black"
         android:layout_marginLeft="50dp"
-        app:layout_constraintTop_toTopOf="@id/defaultCatgry_ic_border"
         android:layout_marginTop="20dp"
         android:text="+"
         android:textColor="#fff"
@@ -30,13 +30,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="58dp"
+        android:layout_marginLeft="12dp"
         android:textSize="16dp"
         android:text="Add category"
         app:fontFamily="@font/helvetica_neue_medium"
-        app:layout_constraintLeft_toLeftOf="@id/defaultCatgry_ic_border"
-        app:layout_constraintRight_toRightOf="@id/defaultCatgry_ic_border"
-        app:layout_constraintTop_toBottomOf="@id/add_category_btn"
         android:textColor="#6B6B6B"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

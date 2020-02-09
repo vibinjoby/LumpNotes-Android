@@ -21,7 +21,7 @@ import com.android.lumpnotes.R;
 import com.android.lumpnotes.fragment.AddCategoryDialogFrag;
 
 
-public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private String[] categoryArr;
     private PopupMenu popupMenu;
     private FragmentManager fragmentManager;
@@ -45,6 +45,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public static class AddCategoryVH extends RecyclerView.ViewHolder {
         public Button addCategoryBtn;
+
         public AddCategoryVH(View v) {
             super(v);
             addCategoryBtn = v.findViewById(R.id.add_category_btn);
@@ -59,13 +60,13 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         context = parent.getContext();
-        if(viewType == TYPE_ADD_CATEGORY) {
-            View v =  LayoutInflater.from(parent.getContext())
+        if (viewType == TYPE_ADD_CATEGORY) {
+            View v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.default_category, parent, false);
-                AddCategoryVH vh = new AddCategoryVH(v);
+            AddCategoryVH vh = new AddCategoryVH(v);
             return vh;
         } else {
-            View v =  LayoutInflater.from(parent.getContext())
+            View v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.category_rc_items, parent, false);
             CategoryVH vh = new CategoryVH(v);
             return vh;
@@ -89,7 +90,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 @Override
                 public void onClick(View v) {
                     AddCategoryDialogFrag dialog = new AddCategoryDialogFrag();
-                    dialog.show(fragmentManager,dialog.getTag());
+                    dialog.show(fragmentManager, dialog.getTag());
                 }
             });
 
@@ -102,7 +103,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     System.out.println("item clicked" + categoryArr[position - 1]);
                 }
             });
-            if(selectedCategory == position) {
+            if (selectedCategory == position) {
                 ((CategoryVH) holder).categoryIcBorder.setBackgroundResource(R.drawable.selected_category_view);
             } else {
                 ((CategoryVH) holder).categoryIcBorder.setBackgroundResource(R.drawable.curved_view);
@@ -130,11 +131,11 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return categoryArr.length + 1;
     }
 
-    private void createMenu(Menu menu,final int position) {
+    private void createMenu(Menu menu, final int position) {
         menu.add("Edit").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                System.out.println("edit clicked for "+ categoryArr[position]);
+                System.out.println("edit clicked for " + categoryArr[position]);
                 return true;
             }
         });
@@ -142,9 +143,9 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         menu.add("Delete").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                System.out.println("delete clicked for "+ categoryArr[position]);
-                final AlertDialog.Builder builder = new AlertDialog.Builder(context,R.style.MyDialogTheme);
-                builder.setTitle("Are you sure you want to delete the category "+ categoryArr[position] +" ?");
+                System.out.println("delete clicked for " + categoryArr[position]);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.MyDialogTheme);
+                builder.setTitle("Are you sure you want to delete the category " + categoryArr[position] + " ?");
                 builder.setMessage("This will be deleted immediately.You can’t undo this action.")
                         .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {

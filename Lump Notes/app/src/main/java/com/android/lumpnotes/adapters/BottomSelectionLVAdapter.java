@@ -16,11 +16,13 @@ public class BottomSelectionLVAdapter extends BaseAdapter {
     String[] selectionArr;
     Context context;
     FragmentManager fragManager;
-    public BottomSelectionLVAdapter(String[] selectionArr,Context context,FragmentManager fragManager) {
+
+    public BottomSelectionLVAdapter(String[] selectionArr, Context context, FragmentManager fragManager) {
         this.selectionArr = selectionArr;
         this.context = context;
         this.fragManager = fragManager;
     }
+
     @Override
     public int getCount() {
         return selectionArr.length;
@@ -38,12 +40,12 @@ public class BottomSelectionLVAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.add_category_note,null);
+        convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.add_category_note, null);
         TextView selectionTxt = convertView.findViewById(R.id.selectionTxt);
         selectionTxt.setText(selectionArr[position]);
 
-        ImageView selectionImg= convertView.findViewById(R.id.selectionIC);
-        if(position == 0) {
+        ImageView selectionImg = convertView.findViewById(R.id.selectionIC);
+        if (position == 0) {
             selectionImg.setImageResource(R.drawable.new_category);
         } else {
             selectionImg.setImageResource(R.drawable.new_note);

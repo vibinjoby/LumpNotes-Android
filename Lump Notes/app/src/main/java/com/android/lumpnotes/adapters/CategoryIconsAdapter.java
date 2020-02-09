@@ -11,6 +11,7 @@ import com.android.lumpnotes.R;
 public class CategoryIconsAdapter extends BaseAdapter {
     int selectedItemIndex = -1;
     ViewHolder holder;
+
     @Override
     public int getCount() {
         return 130;
@@ -40,7 +41,7 @@ public class CategoryIconsAdapter extends BaseAdapter {
             }
         });
 
-        if(selectedItemIndex == position) {
+        if (selectedItemIndex == position) {
             holder.categoryView.setBackgroundResource(R.drawable.selected_btn_view);
         } else {
             holder.categoryView.setBackgroundResource(R.drawable.rounded_ctgry_view);
@@ -50,6 +51,7 @@ public class CategoryIconsAdapter extends BaseAdapter {
         convertView.setTag(holder);
         return convertView;
     }
+
     class ViewHolder {
         Button categoryIcon;
         View categoryView;

@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        String categoryArr[] = {"Shopping","Travel","Education","School","Washing"};
+        String categoryArr[] = {"Shopping", "Travel", "Education", "School", "Washing"};
 
         //Initializing the elements from the view
         categoryRV = findViewById(R.id.category_rv);
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         categoryRV.setHasFixedSize(false);
         notesRv.setHasFixedSize(false);
 
-        mAdapter = new CategoryRVAdapter(categoryArr,getSupportFragmentManager());
+        mAdapter = new CategoryRVAdapter(categoryArr, getSupportFragmentManager());
         categoryRV.setAdapter(mAdapter);
 
         mAdapter = new NotesRVAdapter(categoryArr);
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // If there is no data in the notes update the UI accordingly
-        if(categoryArr.length == 0) {
+        if (categoryArr.length == 0) {
             notesRv.setVisibility(View.GONE);
             searchTxt.setVisibility(View.GONE);
             searchIcon.setVisibility(View.GONE);
@@ -84,25 +84,25 @@ public class MainActivity extends AppCompatActivity {
         final Menu menu = bottomNavigationView.getMenu();
         menu.findItem(R.id.home_menu).setIcon(R.drawable.home_selected);
         bottomNavigationView.setOnNavigationItemSelectedListener(
-            new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-                if(item.getItemId() == R.id.home_menu) {
-                    item.setIcon(R.drawable.home_selected);
-                    menu.findItem(R.id.pinned).setIcon(R.drawable.bookmark);
-                    menu.findItem(R.id.bin).setIcon(R.drawable.bin);
-                } else if(item.getItemId() == R.id.pinned) {
-                    item.setIcon(R.drawable.pinned_selected);
-                    menu.findItem(R.id.home_menu).setIcon(R.drawable.home_menu);
-                    menu.findItem(R.id.bin).setIcon(R.drawable.bin);
-                } else {
-                    item.setIcon(R.drawable.trash_selected);
-                    menu.findItem(R.id.home_menu).setIcon(R.drawable.home_menu);
-                    menu.findItem(R.id.pinned).setIcon(R.drawable.bookmark);
-                }
-                return true;
-            }
-        });
+                        if (item.getItemId() == R.id.home_menu) {
+                            item.setIcon(R.drawable.home_selected);
+                            menu.findItem(R.id.pinned).setIcon(R.drawable.bookmark);
+                            menu.findItem(R.id.bin).setIcon(R.drawable.bin);
+                        } else if (item.getItemId() == R.id.pinned) {
+                            item.setIcon(R.drawable.pinned_selected);
+                            menu.findItem(R.id.home_menu).setIcon(R.drawable.home_menu);
+                            menu.findItem(R.id.bin).setIcon(R.drawable.bin);
+                        } else {
+                            item.setIcon(R.drawable.trash_selected);
+                            menu.findItem(R.id.home_menu).setIcon(R.drawable.home_menu);
+                            menu.findItem(R.id.pinned).setIcon(R.drawable.bookmark);
+                        }
+                        return true;
+                    }
+                });
     }
 }
