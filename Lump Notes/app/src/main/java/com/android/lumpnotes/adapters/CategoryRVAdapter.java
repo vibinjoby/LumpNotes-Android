@@ -191,7 +191,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         this.categoryList = categoryList;
         selectedCategory = -1;
         notifyDataSetChanged();
-        recyclerView.smoothScrollToPosition(recyclerView.getBottom()+1 );
+        recyclerView.scrollToPosition(categoryList.size());
     }
 
     public void notifyChangeForDeletion(List<Category> categoryList,int position) {

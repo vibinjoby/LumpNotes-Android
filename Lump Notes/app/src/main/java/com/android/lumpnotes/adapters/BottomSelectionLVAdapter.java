@@ -48,7 +48,7 @@ public class BottomSelectionLVAdapter extends BaseAdapter {
         if (position == 0) {
             selectionImg.setImageResource(R.drawable.list);
         } else {
-            selectionImg.setImageResource(R.drawable.checklist);
+            selectionImg.setImageResource(R.drawable.new_note);
         }
         return convertView;
     }
