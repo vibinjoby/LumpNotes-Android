@@ -66,11 +66,13 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
             }
         });
         final EditText addCategoryText = view.findViewById(R.id.new_category);
-        if(isEditCategory) {
-            addCategoryText.setText(editCategoryObj.getCategoryName());
-        }
         addCategoryText.addTextChangedListener(this);
         doneBtn = view.findViewById(R.id.doneBtn);
+        if(isEditCategory) {
+            addCategoryText.setText(editCategoryObj.getCategoryName());
+            selectedCategoryIcon = editCategoryObj.getCategoryIcon();
+            doneBtn.setEnabled(true);
+        }
         doneBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,14 +106,24 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                         });
                     }
                 } else {
+                    if(selectedCategoryIcon == null) {
+                        selectedCategoryIcon = editCategoryObj.getCategoryIcon();
+                    }
                     if(addCategoryText.getText().toString().equalsIgnoreCase(editCategoryObj.getCategoryName()) &&
-                            selectedCategoryIcon.equalsIgnoreCase(editCategoryObj.getCategoryIcon())) {
+                            editCategoryObj.getCategoryIcon().equalsIgnoreCase(selectedCategoryIcon)) {
                         AppUtils.showToastMessage(contextObj, "No Changes made to the category", false);
                         dismiss();
                     } else {
-                        if(selectedCategoryIcon == null) {
-                            selectedCategoryIcon = editCategoryObj.getCategoryIcon();
+                        int i = 0;
+                        for(Category categoryObj:categoryList) {
+                            if(categoryObj.getCategoryName().equalsIgnoreCase(editCategoryObj.getCategoryName())) {
+                                categoryObj.setCategoryName(addCategoryText.getText().toString());
+                                categoryObj.setCategoryIcon(selectedCategoryIcon);
+                                categoryList.set(i,categoryObj);
+                            }
+                            i++;
                         }
+                        final int position = i;
                         AppUtils.showToastMessage(contextObj, "Category edited successfully", true);
                         dismiss();
                         new Handler().post(new Runnable() {
@@ -119,6 +131,8 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                             public void run() {
                                 DBHelper dbHelper = new DBHelper(contextObj);
                                 dbHelper.updateCategoryName(editCategoryObj.getCategoryId(), addCategoryText.getText().toString(),selectedCategoryIcon);
+                                //adapter.notifyChangeForEdit(categoryList,position);
+                                adapter = new CategoryRVAdapter(categoryList,adapter.fragmentManager,adapter.recyclerView);
                                 adapter.notifyDataSetChanged();
                             }
                         });
@@ -129,6 +143,13 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
         final GridView gridView = view.findViewById(R.id.icon_view);
         final CategoryIconsAdapter adapter = new CategoryIconsAdapter(getResources());
         gridView.setAdapter(adapter);
+
+        if(isEditCategory) {
+            adapter.selectedItemIndex = Integer.parseInt(editCategoryObj.getCategoryIcon().split("_")[2]);
+            adapter.selectedItemIndex -= 1;
+            selectedCategoryIcon = editCategoryObj.getCategoryIcon();
+            adapter.notifyDataSetChanged();
+        }
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

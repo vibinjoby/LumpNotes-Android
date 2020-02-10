@@ -29,12 +29,12 @@ import java.util.List;
 public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Category> categoryList;
     private PopupMenu popupMenu;
-    private FragmentManager fragmentManager;
+    public FragmentManager fragmentManager;
     private Context context;
     private int selectedCategory = -1;
     private static int TYPE_ADD_CATEGORY = 1;
     private static int TYPE_ALL_CATEGORY = 2;
-    private RecyclerView recyclerView;
+    public RecyclerView recyclerView;
 
     public static class CategoryVH extends RecyclerView.ViewHolder {
         public ImageView categoryIcBorder;
@@ -204,8 +204,10 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         recyclerView.smoothScrollToPosition(position);
     }
 
-    public void notifyChangeForEdit(int position) {
+    public void notifyChangeForEdit(List<Category> categoryList,int position) {
+        this.categoryList = categoryList;
+        selectedCategory = -1;
         notifyDataSetChanged();
-        recyclerView.scrollToPosition(position);
+        recyclerView.scrollToPosition(position - 1);
     }
 }
