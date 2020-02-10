@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,11 +32,16 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
     Context contextObj;
     CategoryRVAdapter adapter;
     List<Category> categoryList;
+    boolean isEditCategory;
+    Category editCategoryObj;
 
-    public AddCategoryDialogFrag(Context contextObj, CategoryRVAdapter adapter,List<Category> categoryList) {
+    public AddCategoryDialogFrag(Context contextObj, CategoryRVAdapter adapter,List<Category> categoryList,boolean isEditCategory,
+    Category editCategoryObj) {
         this.adapter = adapter;
         this.contextObj = contextObj;
         this.categoryList = categoryList;
+        this.isEditCategory = isEditCategory;
+        this.editCategoryObj = editCategoryObj;
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,6 +55,10 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
 
         final View view = inflater.inflate(R.layout.add_category,
                 container, false);
+        TextView textView = view.findViewById(R.id.category_header_txt);
+        if(isEditCategory) {
+            textView.setText("EDIT CATEGORY");
+        }
         view.findViewById(R.id.cancelBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,36 +66,63 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
             }
         });
         final EditText addCategoryText = view.findViewById(R.id.new_category);
+        if(isEditCategory) {
+            addCategoryText.setText(editCategoryObj.getCategoryName());
+        }
         addCategoryText.addTextChangedListener(this);
         doneBtn = view.findViewById(R.id.doneBtn);
         doneBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean isValidCategory = true;
-                for(Category c:categoryList){
-                    if(c.getCategoryName().trim().equalsIgnoreCase(addCategoryText.getText().toString())) {
-                        isValidCategory = false;
-                    }
-                }
-                if(!isValidCategory) {
-                    AppUtils.showToastMessage(contextObj,"Category already exists",false);
-                } else {
-                    Category category = new Category();
-                    category.setCategoryIcon(selectedCategoryIcon);
-                    category.setCategoryName(addCategoryText.getText().toString());
-                    categoryList.add(category);
-                    dismiss();
-                    adapter.notifyChangeForInsert(categoryList);
-                    AppUtils.showToastMessage(contextObj,"New category created successfully",true);
-                    new Handler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            DBHelper dbHelper = new DBHelper(contextObj);
-                            boolean isInserted = dbHelper.saveCategories(addCategoryText.getText().toString(),selectedCategoryIcon);
-                            System.out.println("is inserted is "+isInserted);
-                            System.out.println("selected icon is "+selectedCategoryIcon+" and the edit text is "+addCategoryText.getText().toString());
+                if(!isEditCategory) {
+                    boolean isValidCategory = true;
+                    for (Category c : categoryList) {
+                        if (c.getCategoryName().trim().equalsIgnoreCase(addCategoryText.getText().toString())) {
+                            isValidCategory = false;
                         }
-                    });
+                    }
+                    if (!isValidCategory) {
+                        AppUtils.showToastMessage(contextObj, "Category already exists", false);
+                    } else {
+                        Category category = new Category();
+                        if (selectedCategoryIcon != null) {
+                            category.setCategoryIcon(selectedCategoryIcon);
+                        } else {
+                            category.setCategoryIcon("default_category");
+                        }
+                        category.setCategoryName(addCategoryText.getText().toString());
+                        categoryList.add(category);
+                        AppUtils.showToastMessage(contextObj, "New category created successfully", true);
+                        dismiss();
+                        adapter.notifyChangeForInsert(categoryList);
+                        new Handler().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                DBHelper dbHelper = new DBHelper(contextObj);
+                                dbHelper.saveCategories(addCategoryText.getText().toString(), selectedCategoryIcon);
+                            }
+                        });
+                    }
+                } else {
+                    if(addCategoryText.getText().toString().equalsIgnoreCase(editCategoryObj.getCategoryName()) &&
+                            selectedCategoryIcon.equalsIgnoreCase(editCategoryObj.getCategoryIcon())) {
+                        AppUtils.showToastMessage(contextObj, "No Changes made to the category", false);
+                        dismiss();
+                    } else {
+                        if(selectedCategoryIcon == null) {
+                            selectedCategoryIcon = editCategoryObj.getCategoryIcon();
+                        }
+                        AppUtils.showToastMessage(contextObj, "Category edited successfully", true);
+                        dismiss();
+                        new Handler().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                DBHelper dbHelper = new DBHelper(contextObj);
+                                dbHelper.updateCategoryName(editCategoryObj.getCategoryId(), addCategoryText.getText().toString(),selectedCategoryIcon);
+                                adapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
                 }
             }
         });

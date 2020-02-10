@@ -98,7 +98,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((AddCategoryVH) holder).addCategoryBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,new CategoryRVAdapter(categoryList,fragmentManager,recyclerView),categoryList);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,new CategoryRVAdapter(categoryList,fragmentManager,recyclerView),categoryList,false,null);
                     dialog.show(fragmentManager, dialog.getTag());
                 }
             });
@@ -106,7 +106,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((AddCategoryVH) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,new CategoryRVAdapter(categoryList,fragmentManager,recyclerView),categoryList);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,new CategoryRVAdapter(categoryList,fragmentManager,recyclerView),categoryList,false,null);
                     dialog.show(fragmentManager,dialog.getTag());
                 }
             });
@@ -117,7 +117,6 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 public void onClick(View v) {
                     selectedCategory = position;
                     notifyDataSetChanged();
-                    System.out.println("item clicked" + categoryList.get(position - 1));
                 }
             });
             String uri = "com.android.lumpnotes:drawable/"+categoryList.get(position - 1).getCategoryIcon();
@@ -157,6 +156,9 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 System.out.println("edit clicked for " + categoryList.get(position).getCategoryName());
+                AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,new CategoryRVAdapter(categoryList,fragmentManager,recyclerView)
+                        ,categoryList,true,categoryList.get(position));
+                dialog.show(fragmentManager, dialog.getTag());
                 return true;
             }
         });
@@ -200,5 +202,10 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         selectedCategory = -1;
         notifyDataSetChanged();
         recyclerView.smoothScrollToPosition(position);
+    }
+
+    public void notifyChangeForEdit(int position) {
+        notifyDataSetChanged();
+        recyclerView.scrollToPosition(position);
     }
 }

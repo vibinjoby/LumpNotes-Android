@@ -103,6 +103,13 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void updateCategoryName(int categoryId,String newCategoryName,String categoryIcon) {
+        ContentValues values = new ContentValues();
+        values.put("CATEGORY_NAME",newCategoryName);
+        values.put("CATEGORY_ICON",categoryIcon);
+        db.update("category",values,"category_id = ?",new String[]{""+categoryId});
+    }
+
     public void deleteCategory(int categoryId) {
         db.delete("category", "category_id = ?", new String[]{""+categoryId});
     }
