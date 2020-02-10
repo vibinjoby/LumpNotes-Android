@@ -1,11 +1,16 @@
 package com.android.lumpnotes;
 
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,13 +20,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.adapters.HorizontalSpaceItemDecoration;
 import com.android.lumpnotes.adapters.NotesRVAdapter;
+import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.fragment.BottomSheetFragment;
+import com.android.lumpnotes.models.Category;
+import com.android.lumpnotes.utils.AppUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     private RecyclerView categoryRV;
-    private RecyclerView.Adapter mAdapter;
+    private CategoryRVAdapter categoryRVAdapter;
+    private NotesRVAdapter notesRVAdapter;
 
     private RecyclerView notesRv;
     private Button addButton;
@@ -31,12 +42,11 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        String categoryArr[] = {"Shopping", "Travel", "Education", "School", "Washing"};
+        final List<Category> categoryList = new DBHelper(this).fetchAllCategories();
 
         //Initializing the elements from the view
         categoryRV = findViewById(R.id.category_rv);
@@ -50,11 +60,11 @@ public class MainActivity extends AppCompatActivity {
         categoryRV.setHasFixedSize(false);
         notesRv.setHasFixedSize(false);
 
-        mAdapter = new CategoryRVAdapter(categoryArr, getSupportFragmentManager());
-        categoryRV.setAdapter(mAdapter);
+        categoryRVAdapter = new CategoryRVAdapter(categoryList, getSupportFragmentManager(),categoryRV);
+        categoryRV.setAdapter(categoryRVAdapter);
 
-        mAdapter = new NotesRVAdapter(categoryArr);
-        notesRv.setAdapter(mAdapter);
+        notesRVAdapter = new NotesRVAdapter(new String[]{"firstNote"});
+        notesRv.setAdapter(notesRVAdapter);
 
         layoutManager = new LinearLayoutManager(this);
         notesRv.setLayoutManager(layoutManager);
@@ -65,13 +75,13 @@ public class MainActivity extends AppCompatActivity {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(getSupportFragmentManager());
+                BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(getSupportFragmentManager(),categoryRVAdapter,categoryList);
                 bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
             }
         });
 
         // If there is no data in the notes update the UI accordingly
-        if (categoryArr.length == 0) {
+        if (categoryList.size() == 0) {
             notesRv.setVisibility(View.GONE);
             searchTxt.setVisibility(View.GONE);
             searchIcon.setVisibility(View.GONE);

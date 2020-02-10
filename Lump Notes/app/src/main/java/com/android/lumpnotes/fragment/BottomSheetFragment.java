@@ -11,12 +11,20 @@ import androidx.fragment.app.FragmentManager;
 
 import com.android.lumpnotes.R;
 import com.android.lumpnotes.adapters.BottomSelectionLVAdapter;
+import com.android.lumpnotes.adapters.CategoryRVAdapter;
+import com.android.lumpnotes.models.Category;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+
+import java.util.List;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
     FragmentManager fragManager;
-    public BottomSheetFragment(FragmentManager fragManager) {
+    List<Category> categoryList;
+    CategoryRVAdapter categoryRVAdapter;
+    public BottomSheetFragment(FragmentManager fragManager,CategoryRVAdapter categoryRVAdapter,List<Category> categoryList) {
         this.fragManager = fragManager;
+        this.categoryRVAdapter = categoryRVAdapter;
+        this.categoryList = categoryList;
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,7 +45,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(position == 0) {
                     dismiss();
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag();
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(),categoryRVAdapter,categoryList);
                     dialog.show(fragManager,dialog.getTag());
                 }
             }

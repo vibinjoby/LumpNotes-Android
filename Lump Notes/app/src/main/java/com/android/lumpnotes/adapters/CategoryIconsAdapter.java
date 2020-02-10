@@ -1,20 +1,26 @@
 package com.android.lumpnotes.adapters;
 
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
+import android.widget.TextView;
 
 import com.android.lumpnotes.R;
 
 public class CategoryIconsAdapter extends BaseAdapter {
-    int selectedItemIndex = -1;
+    Resources resourcesObj;
+    public int selectedItemIndex = -1;
     ViewHolder holder;
+
+    public CategoryIconsAdapter(Resources resourcesObj) {
+        this.resourcesObj = resourcesObj;
+    }
 
     @Override
     public int getCount() {
-        return 130;
+        return 59;
     }
 
     @Override
@@ -33,27 +39,26 @@ public class CategoryIconsAdapter extends BaseAdapter {
         holder = new ViewHolder();
         holder.categoryIcon = convertView.findViewById(R.id.icon_btn);
         holder.categoryView = convertView.findViewById(R.id.icon_view);
-        holder.categoryIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selectedItemIndex = position;
-                notifyDataSetChanged();
-            }
-        });
+
+        int imagePos = position + 1;
+
+        String uri = "com.android.lumpnotes:drawable/ctrgy_ic_"+imagePos;
+
+        int res = resourcesObj.getIdentifier(uri, null, null);
+
+        holder.categoryIcon.setBackgroundResource(res);
 
         if (selectedItemIndex == position) {
             holder.categoryView.setBackgroundResource(R.drawable.selected_btn_view);
         } else {
             holder.categoryView.setBackgroundResource(R.drawable.rounded_ctgry_view);
         }
-
-        holder.categoryIcon.setBackgroundResource(R.drawable.music);
         convertView.setTag(holder);
         return convertView;
     }
 
     class ViewHolder {
-        Button categoryIcon;
-        View categoryView;
+        TextView categoryIcon;
+        TextView categoryView;
     }
 }

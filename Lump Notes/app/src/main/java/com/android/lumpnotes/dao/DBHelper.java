@@ -2,15 +2,18 @@ package com.android.lumpnotes.dao;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
+import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.models.NotesAudio;
 import com.android.lumpnotes.models.NotesImage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -26,19 +29,20 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table category (CATEGORY_ID INTEGER PRIMARY KEY AUTOINCREMENT, CATEGORY_NAME TEXT, CATEGORY_ICON TEXT)");
-        db.execSQL("create table note_images (IMAGE_ID INTEGER PRIMARY KEY AUTOINCREMENT, IMAGE_PATH TEXT)");
-        db.execSQL("create table note_audios (AUDIO_ID INTEGER PRIMARY KEY AUTOINCREMENT, AUDIO_PATH TEXT)");
+        db.execSQL("create table note_images (IMAGE_ID INTEGER PRIMARY KEY AUTOINCREMENT, IMAGE_PATH TEXT,NOTE_ID INTEGER," +
+                "CONSTRAINT fk_images FOREIGN KEY (NOTE_ID) REFERENCES notes(NOTE_ID))");
+        db.execSQL("create table note_audios (AUDIO_ID INTEGER PRIMARY KEY AUTOINCREMENT, AUDIO_PATH TEXT,NOTE_ID INTEGER," +
+                "CONSTRAINT fk_audios FOREIGN KEY (NOTE_ID) REFERENCES notes(NOTE_ID))");
         db.execSQL("create table notes (NOTE_ID INTEGER PRIMARY KEY AUTOINCREMENT, CATEGORY_ID INTEGER, NOTE_TITLE TEXT, " +
                 "NOTE_AUDIO_ID INTEGER, NOTE_IMAGE_ID INTEGER, NOTE_DESCRIPTION TEXT, NOTE_CREATED_TIMESTAMP DATE," +
                 "NOTE_LATITUDE_LOC TEXT, NOTE_LONGITUDE_LOC TEXT, IS_PINNED TEXT,IS_DELETED TEXT," +
-                "CONSTRAINT fk_images FOREIGN KEY (NOTE_IMAGE_ID) REFERENCES note_images(IMAGE_ID)," +
-                "CONSTRAINT fk_audios FOREIGN KEY (NOTE_AUDIO_ID) REFERENCES note_audios(AUDIO_ID)," +
                 "CONSTRAINT fk_category FOREIGN KEY (CATEGORY_ID) REFERENCES category(CATEGORY_ID))");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS CATEGORY");
+        onCreate(db);
     }
 
     public boolean saveCategories(String name, String icon) {
@@ -99,8 +103,34 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void fetchWholeDataFromDb() {
+    public void deleteCategory(int categoryId) {
+        db.delete("category", "category_id = ?", new String[]{""+categoryId});
+    }
 
+    public List<Category> fetchAllCategories() {
+        List<Category> categoryList = new ArrayList<>();
+        String query = "SELECT * FROM CATEGORY";
+        Cursor c = null;
+        try {
+            c = db.rawQuery(query, null);
+            if (c.moveToFirst()){
+                do {
+                    Category category = new Category();
+                    category.setCategoryId(c.getInt(0));
+                    category.setCategoryName(c.getString(1));
+                    category.setCategoryIcon(c.getString(2));
+
+                    categoryList.add(category);
+                } while(c.moveToNext());
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(c != null) {
+                c.close();
+            }
+        }
+        return categoryList;
     }
 
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toast_layout_root"
+    android:orientation="horizontal"
+    android:background="@drawable/black_toast_bg"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+
+    <ImageView
+        android:id="@+id/toastImg"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:padding="16dp"/>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="58dp"
+        android:background="#707070"/>
+
+    <TextView
+        android:id="@+id/toast_msg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="New category created successfully"
+        android:fontFamily="@font/helvetica_neue_light"
+        android:textColor="@android:color/white"
+        android:textSize="16dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center"/>
+</LinearLayout>
