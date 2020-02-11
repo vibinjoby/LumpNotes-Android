@@ -23,6 +23,7 @@ import com.android.lumpnotes.fragment.AddCategoryDialogFrag;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.utils.AppUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,6 +36,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private static int TYPE_ADD_CATEGORY = 1;
     private static int TYPE_ALL_CATEGORY = 2;
     public RecyclerView recyclerView;
+    private CategoryRVAdapter adapterObj;
 
     public static class CategoryVH extends RecyclerView.ViewHolder {
         public ImageView categoryIcBorder;
@@ -61,6 +63,8 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     public CategoryRVAdapter(List<Category> categoryList, FragmentManager fragmentManager,RecyclerView recyclerView) {
+        super();
+        adapterObj = this;
         this.categoryList = categoryList;
         this.fragmentManager = fragmentManager;
         this.recyclerView = recyclerView;
@@ -98,7 +102,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((AddCategoryVH) holder).addCategoryBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,new CategoryRVAdapter(categoryList,fragmentManager,recyclerView),categoryList,false,null);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null);
                     dialog.show(fragmentManager, dialog.getTag());
                 }
             });
@@ -106,7 +110,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((AddCategoryVH) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,new CategoryRVAdapter(categoryList,fragmentManager,recyclerView),categoryList,false,null);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null);
                     dialog.show(fragmentManager,dialog.getTag());
                 }
             });
@@ -119,6 +123,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     notifyDataSetChanged();
                 }
             });
+
             String uri = "com.android.lumpnotes:drawable/"+categoryList.get(position - 1).getCategoryIcon();
 
             int res = this.context.getResources().getIdentifier(uri, null, null);
@@ -156,7 +161,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 System.out.println("edit clicked for " + categoryList.get(position).getCategoryName());
-                AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,new CategoryRVAdapter(categoryList,fragmentManager,recyclerView)
+                AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj
                         ,categoryList,true,categoryList.get(position));
                 dialog.show(fragmentManager, dialog.getTag());
                 return true;
@@ -204,10 +209,14 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         recyclerView.smoothScrollToPosition(position);
     }
 
-    public void notifyChangeForEdit(List<Category> categoryList,int position) {
-        this.categoryList = categoryList;
+    public void notifyChangeForEdit(int position) {
         selectedCategory = -1;
         notifyDataSetChanged();
-        recyclerView.scrollToPosition(position - 1);
+        recyclerView.scrollToPosition(position + 1);
+    }
+
+    public void setItems(List<Category> categoryLst) {
+        this.categoryList.clear();
+        this.categoryList.addAll(categoryLst);
     }
 }

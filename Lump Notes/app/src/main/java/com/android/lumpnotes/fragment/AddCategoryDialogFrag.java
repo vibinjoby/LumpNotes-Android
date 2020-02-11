@@ -24,6 +24,7 @@ import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.utils.AppUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher {
@@ -90,6 +91,7 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                         if (selectedCategoryIcon != null) {
                             category.setCategoryIcon(selectedCategoryIcon);
                         } else {
+                            selectedCategoryIcon = "default_category";
                             category.setCategoryIcon("default_category");
                         }
                         category.setCategoryName(addCategoryText.getText().toString());
@@ -109,7 +111,15 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                     if(selectedCategoryIcon == null) {
                         selectedCategoryIcon = editCategoryObj.getCategoryIcon();
                     }
-                    if(addCategoryText.getText().toString().equalsIgnoreCase(editCategoryObj.getCategoryName()) &&
+                    boolean isValidCategory = true;
+                    for (Category c : categoryList) {
+                        if (c.getCategoryName().trim().equalsIgnoreCase(addCategoryText.getText().toString())) {
+                            isValidCategory = false;
+                        }
+                    }
+                    if(!isValidCategory) {
+                        AppUtils.showToastMessage(contextObj, "Category already exists", false);
+                    } else if(addCategoryText.getText().toString().equalsIgnoreCase(editCategoryObj.getCategoryName()) &&
                             editCategoryObj.getCategoryIcon().equalsIgnoreCase(selectedCategoryIcon)) {
                         AppUtils.showToastMessage(contextObj, "No Changes made to the category", false);
                         dismiss();
@@ -120,20 +130,23 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                                 categoryObj.setCategoryName(addCategoryText.getText().toString());
                                 categoryObj.setCategoryIcon(selectedCategoryIcon);
                                 categoryList.set(i,categoryObj);
+                                break;
                             }
                             i++;
                         }
                         final int position = i;
                         AppUtils.showToastMessage(contextObj, "Category edited successfully", true);
                         dismiss();
+                        List<Category> tempList = new ArrayList<>();
+                        tempList.addAll(categoryList);
+                        adapter.setItems(tempList);
+                        //adapter.notifyDataSetChanged();
+                        adapter.notifyChangeForEdit(position);
                         new Handler().post(new Runnable() {
                             @Override
                             public void run() {
                                 DBHelper dbHelper = new DBHelper(contextObj);
                                 dbHelper.updateCategoryName(editCategoryObj.getCategoryId(), addCategoryText.getText().toString(),selectedCategoryIcon);
-                                //adapter.notifyChangeForEdit(categoryList,position);
-                                adapter = new CategoryRVAdapter(categoryList,adapter.fragmentManager,adapter.recyclerView);
-                                adapter.notifyDataSetChanged();
                             }
                         });
                     }
@@ -145,10 +158,13 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
         gridView.setAdapter(adapter);
 
         if(isEditCategory) {
-            adapter.selectedItemIndex = Integer.parseInt(editCategoryObj.getCategoryIcon().split("_")[2]);
-            adapter.selectedItemIndex -= 1;
-            selectedCategoryIcon = editCategoryObj.getCategoryIcon();
-            adapter.notifyDataSetChanged();
+            if(editCategoryObj.getCategoryIcon()!=null
+                    && !editCategoryObj.getCategoryIcon().equalsIgnoreCase("default_category")) {
+                adapter.selectedItemIndex = Integer.parseInt(editCategoryObj.getCategoryIcon().split("_")[2]);
+                adapter.selectedItemIndex -= 1;
+                selectedCategoryIcon = editCategoryObj.getCategoryIcon();
+                adapter.notifyDataSetChanged();
+            }
         }
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
