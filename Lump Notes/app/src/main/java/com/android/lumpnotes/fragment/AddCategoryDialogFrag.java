@@ -15,7 +15,6 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.lumpnotes.R;
 import com.android.lumpnotes.adapters.CategoryIconsAdapter;
@@ -54,7 +53,7 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
 
-        final View view = inflater.inflate(R.layout.add_category,
+        final View view = inflater.inflate(R.layout.add_new_category_popup,
                 container, false);
         TextView textView = view.findViewById(R.id.category_header_txt);
         if(isEditCategory) {
@@ -117,7 +116,7 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                             isValidCategory = false;
                         }
                     }
-                    if(!isValidCategory) {
+                    if(!isValidCategory && selectedCategoryIcon.equalsIgnoreCase(editCategoryObj.getCategoryIcon())) {
                         AppUtils.showToastMessage(contextObj, "Category already exists", false);
                     } else if(addCategoryText.getText().toString().equalsIgnoreCase(editCategoryObj.getCategoryName()) &&
                             editCategoryObj.getCategoryIcon().equalsIgnoreCase(selectedCategoryIcon)) {

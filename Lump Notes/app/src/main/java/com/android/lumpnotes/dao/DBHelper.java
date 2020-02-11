@@ -63,7 +63,6 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void addNoteAudios(List<NotesAudio> audioList) {
-        SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
@@ -135,6 +134,9 @@ public class DBHelper extends SQLiteOpenHelper {
         } finally {
             if(c != null) {
                 c.close();
+            }
+            if(db!=null) {
+                db.close();
             }
         }
         return categoryList;

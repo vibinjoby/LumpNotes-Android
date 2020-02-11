@@ -1,5 +1,6 @@
 package com.android.lumpnotes.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import com.android.lumpnotes.R;
 
 public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHolder> {
     private String[] notesArr;
+    private Context contextObj;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView notesIcView;
@@ -29,8 +31,9 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHo
         }
     }
 
-    public NotesRVAdapter(String[] notesArr) {
+    public NotesRVAdapter(Context contextObj, String[] notesArr) {
         this.notesArr = notesArr;
+        this.contextObj = contextObj;
     }
 
 
@@ -59,5 +62,9 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHo
     @Override
     public int getItemCount() {
         return notesArr.length;
+    }
+
+    public Context getContext() {
+        return contextObj;
     }
 }

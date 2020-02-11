@@ -40,7 +40,7 @@ public class BottomSelectionLVAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.add_category_note, null);
+        convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.bottom_sheet_lv_items, null);
         TextView selectionTxt = convertView.findViewById(R.id.selectionTxt);
         selectionTxt.setText(selectionArr[position]);
 
