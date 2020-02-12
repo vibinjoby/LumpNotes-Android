@@ -1,5 +1,6 @@
 package com.android.lumpnotes.models;
 
+import java.util.Date;
 import java.util.List;
 
 public class Notes {
@@ -7,13 +8,17 @@ public class Notes {
     private int categoryId;
     private String noteTitle;
     private String noteDescription;
-    private String noteCreatedTimeStamp;
+    private Date noteCreatedTimeStamp;
+    private Date lastEditedTimeStamp;
     private String noteLatitudeLoc;
     private String noteLongitudeLoc;
     private List<NotesAudio> audioList;
     private List<NotesImage> imageList;
     private boolean isDeleted;
     private boolean isPinned;
+    private Date deletedDate;
+    private Date pinnedDate;
+    private String address;
 
     public int getNoteId() {
         return noteId;
@@ -47,11 +52,11 @@ public class Notes {
         this.noteDescription = noteDescription;
     }
 
-    public String getNoteCreatedTimeStamp() {
+    public Date getNoteCreatedTimeStamp() {
         return noteCreatedTimeStamp;
     }
 
-    public void setNoteCreatedTimeStamp(String noteCreatedTimeStamp) {
+    public void setNoteCreatedTimeStamp(Date noteCreatedTimeStamp) {
         this.noteCreatedTimeStamp = noteCreatedTimeStamp;
     }
 
@@ -103,6 +108,38 @@ public class Notes {
         isPinned = pinned;
     }
 
+    public Date getDeletedDate() {
+        return deletedDate;
+    }
+
+    public void setDeletedDate(Date deletedDate) {
+        this.deletedDate = deletedDate;
+    }
+
+    public Date getPinnedDate() {
+        return pinnedDate;
+    }
+
+    public void setPinnedDate(Date pinnedDate) {
+        this.pinnedDate = pinnedDate;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Date getLastEditedTimeStamp() {
+        return lastEditedTimeStamp;
+    }
+
+    public void setLastEditedTimeStamp(Date lastEditedTimeStamp) {
+        this.lastEditedTimeStamp = lastEditedTimeStamp;
+    }
+
     @Override
     public String toString() {
         return "Notes{" +
@@ -111,12 +148,16 @@ public class Notes {
                 ", noteTitle='" + noteTitle + '\'' +
                 ", noteDescription='" + noteDescription + '\'' +
                 ", noteCreatedTimeStamp='" + noteCreatedTimeStamp + '\'' +
+                ", lastEditedTimeStamp='" + lastEditedTimeStamp + '\'' +
                 ", noteLatitudeLoc='" + noteLatitudeLoc + '\'' +
                 ", noteLongitudeLoc='" + noteLongitudeLoc + '\'' +
                 ", audioList=" + audioList +
                 ", imageList=" + imageList +
                 ", isDeleted=" + isDeleted +
                 ", isPinned=" + isPinned +
+                ", deletedDate=" + deletedDate +
+                ", pinnedDate=" + pinnedDate +
+                ", address='" + address + '\'' +
                 '}';
     }
 }

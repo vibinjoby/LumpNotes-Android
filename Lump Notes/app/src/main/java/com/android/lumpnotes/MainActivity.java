@@ -7,6 +7,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,12 +19,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.adapters.HorizontalSpaceItemDecoration;
 import com.android.lumpnotes.adapters.NotesRVAdapter;
+import com.android.lumpnotes.adapters.PinnedNotesRVAdapter;
+import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.swipes.SwipeHelper;
 import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.fragment.BottomSheetFragment;
 import com.android.lumpnotes.models.Category;
+import com.android.lumpnotes.utils.AppUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,12 +36,14 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView categoryRV;
     private CategoryRVAdapter categoryRVAdapter;
     private NotesRVAdapter notesRVAdapter;
+    private boolean isTestData = true;
 
     private RecyclerView notesRv;
     private Button addButton;
     private View emptyNotesView;
     private EditText searchTxt;
     private Button searchIcon;
+    private List<Category> categoryList;
 
     private BottomNavigationView bottomNavigationView;
 
@@ -43,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final List<Category> categoryList = new DBHelper(this).fetchAllCategories();
+        categoryList = new DBHelper(this).fetchAllCategories();
 
         //Initializing the elements from the view
         categoryRV = findViewById(R.id.category_rv);
@@ -73,7 +81,10 @@ public class MainActivity extends AppCompatActivity {
                         new SwipeHelper.UnderlayButtonClickListener() {
                             @Override
                             public void onClick(int pos) {
-                                // TODO: onDelete
+                                Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
+                                deleteToast.show();
+                                System.out.println(categoryList.get(categoryRVAdapter.selectedCategory));
+                                System.out.println(notesRVAdapter.getItemId(pos));
                             }
                         }
                 ));
@@ -85,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
                         new SwipeHelper.UnderlayButtonClickListener() {
                             @Override
                             public void onClick(int pos) {
-                                // TODO: OnTransfer
+                                Toast moveToast =Toast. makeText(getApplicationContext(),"Move clicked",Toast. LENGTH_SHORT);
+                                moveToast.show();
                             }
                         }
                 ));
@@ -125,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
                         if (item.getItemId() == R.id.home_menu) {
                             item.setIcon(R.drawable.home_selected);
                             menu.findItem(R.id.pinned).setIcon(R.drawable.bookmark);
@@ -134,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
                             findViewById(R.id.main_layout).setVisibility(View.VISIBLE);
                             findViewById(R.id.delete_layout).setVisibility(View.GONE);
                         } else if (item.getItemId() == R.id.pinned) {
+                            showPinnedNotes();
                             item.setIcon(R.drawable.pinned_selected);
                             menu.findItem(R.id.home_menu).setIcon(R.drawable.home_menu);
                             menu.findItem(R.id.bin).setIcon(R.drawable.bin);
@@ -151,5 +163,82 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                 });
+    }
+
+    private void showPinnedNotes() {
+        List<Notes> notesList = new ArrayList<>();
+        List<Notes> dayWiseList = null;
+        PinnedNotesRVAdapter adapter = null;
+
+        TextView todayTxt = findViewById(R.id.todayTxt);
+        TextView yesterdayTxt = findViewById(R.id.yesterdayTxt);
+        TextView oldTxt = findViewById(R.id.oldTxt);
+
+        RecyclerView todayRV = findViewById(R.id.todayRV);
+        RecyclerView yesterdayRV = findViewById(R.id.yesterdayRV);
+        RecyclerView oldRV = findViewById(R.id.oldRV);
+        layoutManager = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        todayRV.setLayoutManager(layoutManager);
+        layoutManager = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        yesterdayRV.setLayoutManager(layoutManager);
+        layoutManager = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        oldRV.setLayoutManager(layoutManager);
+
+
+        if(isTestData) {
+            adapter = new PinnedNotesRVAdapter(null);
+            todayRV.setAdapter(adapter);
+            yesterdayRV.setAdapter(adapter);
+            oldRV.setAdapter(adapter);
+        } else {
+
+            for (Category category : categoryList) {
+                if (category.getNotesList() != null) {
+                    notesList.addAll(category.getNotesList());
+                }
+            }
+
+            dayWiseList = AppUtils.getPinnedNotesByDay(notesList, true, false);
+            if (!dayWiseList.isEmpty()) {
+                adapter = new PinnedNotesRVAdapter(dayWiseList);
+                todayRV.setAdapter(adapter);
+            } else {
+                todayRV.setVisibility(View.GONE);
+                todayTxt.setVisibility(View.GONE);
+            }
+
+            dayWiseList = AppUtils.getPinnedNotesByDay(notesList, false, true);
+            if (!dayWiseList.isEmpty()) {
+                adapter = new PinnedNotesRVAdapter(dayWiseList);
+                yesterdayRV.setAdapter(adapter);
+            } else {
+                yesterdayRV.setVisibility(View.GONE);
+                yesterdayTxt.setVisibility(View.GONE);
+            }
+
+            dayWiseList = AppUtils.getPinnedNotesByDay(notesList, false, false);
+            if (!dayWiseList.isEmpty()) {
+                adapter = new PinnedNotesRVAdapter(dayWiseList);
+                oldRV.setAdapter(adapter);
+            } else {
+                oldRV.setVisibility(View.GONE);
+                oldTxt.setVisibility(View.GONE);
+            }
+        }
     }
 }

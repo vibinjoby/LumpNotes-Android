@@ -61,9 +61,9 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             swipedItem.getGlobalVisibleRect(rect);
 
             if (e.getAction() == MotionEvent.ACTION_DOWN || e.getAction() == MotionEvent.ACTION_UP ||e.getAction() == MotionEvent.ACTION_MOVE) {
-                if (rect.top < point.y && rect.bottom > point.y)
+                if (rect.top < point.y && rect.bottom > point.y) {
                     gestureDetector.onTouchEvent(e);
-                else {
+                } else {
                     recoverQueue.add(swipedPos);
                     swipedPos = -1;
                     recoverSwipedItem();
@@ -225,7 +225,6 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
                 clickListener.onClick(pos);
                 return true;
             }
-
             return false;
         }
 

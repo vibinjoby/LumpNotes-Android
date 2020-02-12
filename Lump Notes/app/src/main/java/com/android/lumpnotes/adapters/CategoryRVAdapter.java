@@ -32,7 +32,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private PopupMenu popupMenu;
     public FragmentManager fragmentManager;
     private Context context;
-    private int selectedCategory = -1;
+    public int selectedCategory = -1;
     private static int TYPE_ADD_CATEGORY = 1;
     private static int TYPE_ALL_CATEGORY = 2;
     public RecyclerView recyclerView;
