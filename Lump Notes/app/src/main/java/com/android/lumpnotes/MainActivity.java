@@ -217,8 +217,6 @@ public class MainActivity extends AppCompatActivity {
                                 public void onClick(int pos) {
                                     Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
                                     deleteToast.show();
-                                    System.out.println(categoryList.get(categoryRVAdapter.selectedCategory));
-                                    System.out.println(notesRVAdapter.getItemId(pos));
                                 }
                             }
                     ));
@@ -252,8 +250,6 @@ public class MainActivity extends AppCompatActivity {
                                 public void onClick(int pos) {
                                     Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
                                     deleteToast.show();
-                                    System.out.println(categoryList.get(categoryRVAdapter.selectedCategory));
-                                    System.out.println(notesRVAdapter.getItemId(pos));
                                 }
                             }
                     ));
