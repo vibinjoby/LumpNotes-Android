@@ -37,6 +37,8 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
     private Queue<Integer> recoverQueue;
     private static Drawable deleteIcon;
     private static Drawable moveIcon;
+    private int verticalSpace;
+    private int horizontalSpace;
 
     private GestureDetector.SimpleOnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener(){
         @Override
@@ -73,7 +75,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         }
     };
 
-    public SwipeHelper(Context context, RecyclerView recyclerView) {
+    public SwipeHelper(Context context, RecyclerView recyclerView, int verticalSpace, int horizontalSpace) {
         super(0, ItemTouchHelper.LEFT);
         deleteIcon = ContextCompat.getDrawable(context,
                 R.drawable.bin);
@@ -83,6 +85,8 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         this.buttons = new ArrayList<>();
         this.gestureDetector = new GestureDetector(context, gestureListener);
         this.recyclerView.setOnTouchListener(onTouchListener);
+        this.verticalSpace = verticalSpace;
+        this.horizontalSpace = horizontalSpace;
         buttonsBuffer = new HashMap<>();
         recoverQueue = new LinkedList<Integer>(){
             @Override
@@ -161,7 +165,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
                 }
 
                 translationX = dX * buffer.size() * BUTTON_WIDTH / itemView.getWidth();
-                drawButtons(c, itemView, buffer, pos, translationX);
+                drawButtons(c, itemView, buffer, pos, translationX,verticalSpace,horizontalSpace);
             }
         }
 
@@ -177,7 +181,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         }
     }
 
-    private void drawButtons(Canvas c, View itemView, List<UnderlayButton> buffer, int pos, float dX){
+    private void drawButtons(Canvas c, View itemView, List<UnderlayButton> buffer, int pos, float dX,int verticalSpace,int horizontalSpace){
         float right = itemView.getRight();
         float dButtonWidth = (-1) * dX / buffer.size();
 
@@ -191,7 +195,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
                             right,
                             itemView.getBottom()
                     ),
-                    pos
+                    pos,verticalSpace,horizontalSpace
             );
 
             right = left;
@@ -228,7 +232,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             return false;
         }
 
-        public void onDraw(Canvas c, RectF rect, int pos){
+        public void onDraw(Canvas c, RectF rect, int pos,int verticalSpace, int horizontalSpace){
             Paint p = new Paint();
 
             // Draw background
@@ -247,14 +251,12 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             float x = cWidth / 2f - r.width() / 2f - r.left;
             float y = cHeight / 2f + r.height() / 2f - r.bottom;
             if(text.equalsIgnoreCase("Delete")) {
-                deleteIcon.setBounds((int)rect.left + 40,(int)rect.top + 80,(int)rect.right-40,(int)rect.bottom - 80);
+                deleteIcon.setBounds((int)rect.left + horizontalSpace,(int)rect.top + verticalSpace,(int)rect.right-horizontalSpace,(int)rect.bottom - verticalSpace);
                 deleteIcon.draw(c);
             } else {
-                moveIcon.setBounds((int)rect.left + 40,(int)rect.top + 80,(int)rect.right-40,(int)rect.bottom - 80);
+                moveIcon.setBounds((int)rect.left + horizontalSpace,(int)rect.top + verticalSpace,(int)rect.right-horizontalSpace,(int)rect.bottom - verticalSpace);
                 moveIcon.draw(c);
             }
-
-            //c.drawText(text, rect.left + x, rect.top + y, p);
 
             clickRegion = rect;
             this.pos = pos;

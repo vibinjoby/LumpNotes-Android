@@ -58,7 +58,7 @@ public class PinnedNotesRVAdapter extends RecyclerView.Adapter<PinnedNotesRVAdap
     @Override
     public int getItemCount() {
         if(isTestData) {
-            return 10;
+            return 3;
         }
         return pinnedNotes.size();
     }

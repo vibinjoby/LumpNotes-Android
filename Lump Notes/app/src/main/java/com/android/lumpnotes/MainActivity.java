@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         //Notes Recycler View
         notesRVAdapter = new NotesRVAdapter(this,new String[]{"firstNote"});
         notesRv.setAdapter(notesRVAdapter);
-        SwipeHelper swipeHelper = new SwipeHelper(this, notesRv) {
+        SwipeHelper swipeHelper = new SwipeHelper(this, notesRv,80,50) {
             @Override
             public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
@@ -166,6 +166,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showPinnedNotes() {
+        SwipeHelper swipeHelper = null;
+        ItemTouchHelper itemTouchHelper = null;
+
         List<Notes> notesList = new ArrayList<>();
         List<Notes> dayWiseList = null;
         PinnedNotesRVAdapter adapter = null;
@@ -199,12 +202,111 @@ public class MainActivity extends AppCompatActivity {
         };
         oldRV.setLayoutManager(layoutManager);
 
-
         if(isTestData) {
             adapter = new PinnedNotesRVAdapter(null);
             todayRV.setAdapter(adapter);
+            swipeHelper = new SwipeHelper(this, todayRV,140,60) {
+                @Override
+                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "Delete",
+                            0,
+                            Color.parseColor("#FF3C30"),
+                            new SwipeHelper.UnderlayButtonClickListener() {
+                                @Override
+                                public void onClick(int pos) {
+                                    Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
+                                    deleteToast.show();
+                                    System.out.println(categoryList.get(categoryRVAdapter.selectedCategory));
+                                    System.out.println(notesRVAdapter.getItemId(pos));
+                                }
+                            }
+                    ));
+
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "Move",
+                            0,
+                            Color.parseColor("#0000cc"),
+                            new SwipeHelper.UnderlayButtonClickListener() {
+                                @Override
+                                public void onClick(int pos) {
+                                    Toast moveToast =Toast. makeText(getApplicationContext(),"Move clicked",Toast. LENGTH_SHORT);
+                                    moveToast.show();
+                                }
+                            }
+                    ));
+                }
+            };
+            itemTouchHelper = new ItemTouchHelper(swipeHelper);
+            itemTouchHelper.attachToRecyclerView(todayRV);
             yesterdayRV.setAdapter(adapter);
+            swipeHelper = new SwipeHelper(this, yesterdayRV,140,60) {
+                @Override
+                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "Delete",
+                            0,
+                            Color.parseColor("#FF3C30"),
+                            new SwipeHelper.UnderlayButtonClickListener() {
+                                @Override
+                                public void onClick(int pos) {
+                                    Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
+                                    deleteToast.show();
+                                    System.out.println(categoryList.get(categoryRVAdapter.selectedCategory));
+                                    System.out.println(notesRVAdapter.getItemId(pos));
+                                }
+                            }
+                    ));
+
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "Move",
+                            0,
+                            Color.parseColor("#0000cc"),
+                            new SwipeHelper.UnderlayButtonClickListener() {
+                                @Override
+                                public void onClick(int pos) {
+                                    Toast moveToast =Toast. makeText(getApplicationContext(),"Move clicked",Toast. LENGTH_SHORT);
+                                    moveToast.show();
+                                }
+                            }
+                    ));
+                }
+            };
             oldRV.setAdapter(adapter);
+            itemTouchHelper = new ItemTouchHelper(swipeHelper);
+            itemTouchHelper.attachToRecyclerView(yesterdayRV);
+            swipeHelper = new SwipeHelper(this, oldRV,140,60) {
+                @Override
+                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "Delete",
+                            0,
+                            Color.parseColor("#FF3C30"),
+                            new SwipeHelper.UnderlayButtonClickListener() {
+                                @Override
+                                public void onClick(int pos) {
+                                    Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
+                                    deleteToast.show();
+                                }
+                            }
+                    ));
+
+                    underlayButtons.add(new SwipeHelper.UnderlayButton(
+                            "Move",
+                            0,
+                            Color.parseColor("#0000cc"),
+                            new SwipeHelper.UnderlayButtonClickListener() {
+                                @Override
+                                public void onClick(int pos) {
+                                    Toast moveToast =Toast. makeText(getApplicationContext(),"Move clicked",Toast. LENGTH_SHORT);
+                                    moveToast.show();
+                                }
+                            }
+                    ));
+                }
+            };
+            itemTouchHelper = new ItemTouchHelper(swipeHelper);
+            itemTouchHelper.attachToRecyclerView(oldRV);
         } else {
 
             for (Category category : categoryList) {
