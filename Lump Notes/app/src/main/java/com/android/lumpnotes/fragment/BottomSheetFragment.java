@@ -1,5 +1,6 @@
 package com.android.lumpnotes.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.ListView;
 import androidx.fragment.app.FragmentManager;
 
 import com.android.lumpnotes.R;
+import com.android.lumpnotes.activity.AddNotesActivity;
 import com.android.lumpnotes.adapters.BottomSelectionLVAdapter;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.models.Category;
@@ -47,6 +49,10 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                     dismiss();
                     AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(),categoryRVAdapter,categoryList,false,null);
                     dialog.show(fragManager,dialog.getTag());
+                } else {
+                    dismiss();
+                    Intent addNotesIntent = new Intent(BottomSheetFragment.this.getContext(), AddNotesActivity.class);
+                    BottomSheetFragment.this.startActivity(addNotesIntent);
                 }
             }
         });

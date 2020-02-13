@@ -11,6 +11,13 @@
     <style name="SearchBarTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textColorHint">@color/white</item>
     </style>
+
+    <style name="NotesTitleTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textColorHint">@color/notes_title_theme_color</item>
+    </style>
+    <style name="NotesDesciptionTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textColorHint">@color/notes_description_theme_color</item>
+    </style>
     <style name="SplashTheme" parent="AppTheme">
         <item name="android:windowBackground">@drawable/bg_splash</item>
     </style>

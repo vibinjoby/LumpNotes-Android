@@ -8,4 +8,6 @@
     <color name="orange">#453186</color>
     <color name="yellow">#EFAE3D</color>
     <color name="app_theme_color">#3B3A43</color>
+    <color name="notes_title_theme_color">#333232</color>
+    <color name="notes_description_theme_color">#6F6F6F</color>
 </resources>

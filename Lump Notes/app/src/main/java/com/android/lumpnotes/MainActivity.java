@@ -12,14 +12,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.adapters.HorizontalSpaceItemDecoration;
 import com.android.lumpnotes.adapters.NotesRVAdapter;
 import com.android.lumpnotes.adapters.PinnedNotesRVAdapter;
+import com.android.lumpnotes.adapters.TrashNotesRVAdapter;
 import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.swipes.SwipeHelper;
 import com.android.lumpnotes.dao.DBHelper;
@@ -30,6 +33,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.System.in;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
@@ -69,9 +74,9 @@ public class MainActivity extends AppCompatActivity {
         categoryRV.setAdapter(categoryRVAdapter);
 
         //Notes Recycler View
-        notesRVAdapter = new NotesRVAdapter(this,new String[]{"firstNote"});
+        notesRVAdapter = new NotesRVAdapter(this,new String[]{"firstNote","second note","third note"});
         notesRv.setAdapter(notesRVAdapter);
-        SwipeHelper swipeHelper = new SwipeHelper(this, notesRv,80,50) {
+        SwipeHelper swipeHelper = new SwipeHelper(this, notesRv,60,60) {
             @Override
             public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
@@ -153,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
                             findViewById(R.id.main_layout).setVisibility(View.GONE);
                             findViewById(R.id.delete_layout).setVisibility(View.GONE);
                         } else {
+                            showTrashMenuItems();
                             item.setIcon(R.drawable.trash_selected);
                             menu.findItem(R.id.home_menu).setIcon(R.drawable.home_menu);
                             menu.findItem(R.id.pinned).setIcon(R.drawable.bookmark);
@@ -205,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
         if(isTestData) {
             adapter = new PinnedNotesRVAdapter(null);
             todayRV.setAdapter(adapter);
-            swipeHelper = new SwipeHelper(this, todayRV,140,60) {
+            swipeHelper = new SwipeHelper(this, todayRV,100,60) {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
@@ -238,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
             itemTouchHelper = new ItemTouchHelper(swipeHelper);
             itemTouchHelper.attachToRecyclerView(todayRV);
             yesterdayRV.setAdapter(adapter);
-            swipeHelper = new SwipeHelper(this, yesterdayRV,140,60) {
+            swipeHelper = new SwipeHelper(this, yesterdayRV,100,60) {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
@@ -271,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
             oldRV.setAdapter(adapter);
             itemTouchHelper = new ItemTouchHelper(swipeHelper);
             itemTouchHelper.attachToRecyclerView(yesterdayRV);
-            swipeHelper = new SwipeHelper(this, oldRV,140,60) {
+            swipeHelper = new SwipeHelper(this, oldRV,100,60) {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
                     underlayButtons.add(new SwipeHelper.UnderlayButton(
@@ -338,5 +344,13 @@ public class MainActivity extends AppCompatActivity {
                 oldTxt.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void showTrashMenuItems() {
+        TrashNotesRVAdapter adapter = new TrashNotesRVAdapter(null);
+        RecyclerView deleteNotesRV = findViewById(R.id.delete_notes_rv);
+        RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2,1);
+        deleteNotesRV.setLayoutManager(layoutManager);
+        deleteNotesRV.setAdapter(adapter);
     }
 }

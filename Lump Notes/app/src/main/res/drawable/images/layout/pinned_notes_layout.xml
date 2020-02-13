@@ -38,7 +38,7 @@
 
         <TextView
             android:id="@+id/todayTxt"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/helvetica_neu_bold"
@@ -55,7 +55,7 @@
 
         <TextView
             android:id="@+id/yesterdayTxt"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/helvetica_neu_bold"
@@ -72,7 +72,7 @@
 
         <TextView
             android:id="@+id/oldTxt"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/helvetica_neu_bold"
@@ -85,7 +85,7 @@
             android:id="@+id/oldRV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="30dp"
             android:layout_marginTop="20dp" />
         </LinearLayout>
     </ScrollView>

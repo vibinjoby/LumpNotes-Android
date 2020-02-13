@@ -20,7 +20,7 @@ public class CategoryIconsAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return 59;
+        return 49;
     }
 
     @Override
