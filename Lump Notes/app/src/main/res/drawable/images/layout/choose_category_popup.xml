@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/dialog_header"
+        android:layout_width="match_parent"
+        android:layout_height="67dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:background="#0C0427"/>
+
+    <Button
+        android:id="@+id/dismiss_dialog_btn"
+        android:layout_width="13dp"
+        android:layout_height="13dp"
+        android:background="@raw/cancel"
+        android:layout_marginLeft="20dp"
+        app:layout_constraintTop_toTopOf="@id/dialog_header"
+        app:layout_constraintBottom_toBottomOf="@id/dialog_header"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose category"
+        android:textSize="16dp"
+        android:textColor="#FFFFFF"
+        android:layout_marginLeft="30dp"
+        app:layout_constraintTop_toTopOf="@id/dialog_header"
+        app:layout_constraintBottom_toBottomOf="@id/dialog_header"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:fontFamily="@font/helvetica_neue_medium"/>
+
+    <View
+        android:id="@+id/search_bar_container"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:background="#F7F7F7"
+        app:layout_constraintTop_toBottomOf="@id/dialog_header"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <EditText
+        android:id="@+id/dialog_search_bar"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        app:layout_constraintTop_toTopOf="@id/search_bar_container"
+        app:layout_constraintBottom_toBottomOf="@id/search_bar_container"
+        android:hint="Search…"
+        android:paddingLeft="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/white_search_bar_curved"/>
+
+    <Button
+        android:id="@+id/dialog_search_icon"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:background="@raw/search"
+        android:layout_marginLeft="20dp"
+        app:layout_constraintTop_toTopOf="@id/dialog_search_bar"
+        app:layout_constraintBottom_toBottomOf="@id/dialog_search_bar"
+        app:layout_constraintLeft_toLeftOf="@id/dialog_search_bar"/>
+
+    <TextView
+        android:id="@+id/category_list_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CATEGORY LIST"
+        app:layout_constraintLeft_toLeftOf="@id/dialog_search_icon"
+        app:layout_constraintTop_toBottomOf="@id/search_bar_container"
+        android:textColor="#0C0427"
+        android:textSize="14dp"
+        android:fontFamily="@font/helvetica_neue_medium"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/choose_category_rv"
+        android:layout_width="match_parent"
+        android:layout_height="362dp"
+        app:layout_constraintTop_toBottomOf="@id/category_list_txt"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <Button
+        android:id="@+id/add_category_ch_btn"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:textColor="@color/white"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:textSize="25dp"
+        android:text="+"
+        app:layout_constraintBottom_toBottomOf="@id/choose_category_rv"
+        app:layout_constraintRight_toRightOf="parent"
+        android:background="@drawable/round_plus_button_black"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

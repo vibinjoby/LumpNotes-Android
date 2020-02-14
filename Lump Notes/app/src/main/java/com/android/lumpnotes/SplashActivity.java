@@ -6,6 +6,8 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.lumpnotes.activity.MainActivity;
+
 public class SplashActivity extends AppCompatActivity {
 
     @Override

@@ -1,4 +1,4 @@
-package com.android.lumpnotes;
+package com.android.lumpnotes.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.android.lumpnotes.R;
 import com.android.lumpnotes.activity.AddNotesActivity;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.adapters.HorizontalSpaceItemDecoration;
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         categoryRVAdapter = new CategoryRVAdapter(categoryList, getSupportFragmentManager(),categoryRV);
         categoryRV.setAdapter(categoryRVAdapter);
 
-        //Notes Recycler View
+        //Notes Recycler View and setting the values of first category as default to notes
         if(categoryList != null && !categoryList.isEmpty()) {
             notesRVAdapter = new NotesRVAdapter(categoryList.get(0).getNotesList(),emptyNotes,this);
         } else {
@@ -365,12 +366,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if(resultCode == Activity.RESULT_OK) {
             categoryList = new DBHelper(this).fetchAllCategories();
-        } else {
-            // AnotherActivity was not successful. No data to retrieve.
+            categoryRVAdapter.setItems(categoryList);
+            if(data!=null && data.getExtras().get("category_id") != null) {
+                if(data.getExtras().get("category_id").equals(0)) {
+                    notesRVAdapter.setNotesList(categoryList.get(0).getNotesList());
+                }
+            }
         }
-
     }
 }

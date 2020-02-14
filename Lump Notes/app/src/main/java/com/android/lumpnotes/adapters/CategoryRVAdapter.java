@@ -201,6 +201,8 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public void notifyChangeForInsert(List<Category> categoryList) {
         this.categoryList = categoryList;
         selectedCategory = categoryList.size();
+        notesAdapterobj.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
+        notesAdapterobj.notifyDataSetChanged();
         notifyDataSetChanged();
         recyclerView.scrollToPosition(categoryList.size());
     }
@@ -210,18 +212,23 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         AppUtils.showToastMessage(context,"Category deleted Successfully",true);
         selectedCategory = 1;
         notifyDataSetChanged();
+        notesAdapterobj.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
+        notesAdapterobj.notifyDataSetChanged();
         recyclerView.smoothScrollToPosition(position);
     }
 
     public void notifyChangeForEdit(int position) {
         selectedCategory = position+1;
         notifyDataSetChanged();
+        notesAdapterobj.setNotesList(categoryList.get(position).getNotesList());
+        notesAdapterobj.notifyDataSetChanged();
         recyclerView.scrollToPosition(position + 1);
     }
 
     public void setItems(List<Category> categoryLst) {
         this.categoryList.clear();
         this.categoryList.addAll(categoryLst);
+        notifyDataSetChanged();
     }
 
     public void setNotesAdapterobj(NotesRVAdapter notesAdapterobj) {

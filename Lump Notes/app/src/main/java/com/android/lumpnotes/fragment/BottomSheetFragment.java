@@ -16,6 +16,7 @@ import com.android.lumpnotes.adapters.BottomSelectionLVAdapter;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.models.Category;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.gson.Gson;
 
 import java.util.List;
 
@@ -52,7 +53,11 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 } else {
                     dismiss();
                     Intent addNotesIntent = new Intent(BottomSheetFragment.this.getContext(), AddNotesActivity.class);
-                    BottomSheetFragment.this.startActivity(addNotesIntent);
+                    String listSerializedToJson = new Gson().toJson(categoryList);
+                    addNotesIntent.putExtra("categoryList",listSerializedToJson);
+                    //String adapterJson = new Gson().toJson(categoryRVAdapter);
+                    //addNotesIntent.putExtra("categoryRVAdapter",adapterJson);
+                    BottomSheetFragment.this.startActivityForResult(addNotesIntent,1);
                 }
             }
         });

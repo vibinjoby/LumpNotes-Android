@@ -10,8 +10,16 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.lumpnotes.R;
+import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.dao.DBHelper;
+import com.android.lumpnotes.fragment.ChooseCategoryDialogFrag;
+import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.utils.AppUtils;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class AddNotesActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -20,16 +28,34 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     Button imageUploadBtn, audioBtn;
     EditText notesTitle,notesDescription;
 
+    List<Category> categoryList = null;
+    CategoryRVAdapter categoryRVAdapter = null;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.notes_layout);
+
+        //Getting addIntent
+        if(getIntent().getExtras().getString("categoryList")!=null) {
+            String listSerializedToJson = getIntent().getExtras().getString("categoryList");
+            Category [] categoryArr = new Gson().fromJson(listSerializedToJson, Category[].class);
+            categoryList = new ArrayList<>(Arrays.asList(categoryArr));
+        }
+        //if(addIntent.getExtras().get("categoryRVAdapter")!=null) {
+          //  categoryRVAdapter = (CategoryRVAdapter)addIntent.getExtras().get("categoryRVAdapter");
+        //}
 
         // Getting data for intent
         Intent editIntent = getIntent();
         String title = editIntent.getStringExtra("notesTitle");
         String description = editIntent.getStringExtra("notesDescription");
 
+        if(categoryList != null ) {
+            ChooseCategoryDialogFrag dialog = new ChooseCategoryDialogFrag(categoryList,null);
+            dialog.show(getSupportFragmentManager(),dialog.getTag());
+        }
 
         locationBtn = findViewById(R.id.location_button);
         shareBtn = findViewById(R.id.share_button);
@@ -71,7 +97,9 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             boolean isInserted = dbHelper.saveNotes(0,notesTitle.getText().toString(),
                     notesDescription.getText().toString(),"27.2038","77.5011");
             if(isInserted) {
-                setResult(Activity.RESULT_OK);
+                final Intent data = new Intent();
+                data.putExtra("category_id",0);
+                setResult(Activity.RESULT_OK,data);
                 AppUtils.showToastMessage(this,"Notes Saved Successfully",true);
                 finish();
             } else {

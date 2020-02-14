@@ -1,6 +1,6 @@
 package com.android.lumpnotes.adapters;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +21,7 @@ import java.util.List;
 public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHolder> {
     private List<Notes> notesList;
     private EmptyNotes emptyNotes;
-    private Context context;
+    private Activity activity;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView notesIcView;
@@ -38,10 +38,10 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHo
         }
     }
 
-    public NotesRVAdapter(List<Notes> notesList,EmptyNotes emptyNotes,Context context) {
+    public NotesRVAdapter(List<Notes> notesList,EmptyNotes emptyNotes,Activity activity) {
         this.notesList = notesList;
         this.emptyNotes = emptyNotes;
-        this.context = context;
+        this.activity = activity;
     }
 
 
@@ -63,10 +63,10 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHo
             @Override
             public void onClick(View v) {
                 if(notesList!=null) {
-                    Intent i=new Intent(context, AddNotesActivity.class);
+                    Intent i=new Intent(activity.getApplicationContext(), AddNotesActivity.class);
                     i.putExtra("notesTitle", notesList.get(position).getNoteTitle());
                     i.putExtra("notesDescription", notesList.get(position).getNoteDescription());
-                    context.startActivity(i);
+                    activity.startActivityForResult(i,1);
                 }
             }
         });
