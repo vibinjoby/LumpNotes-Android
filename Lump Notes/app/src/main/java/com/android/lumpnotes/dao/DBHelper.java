@@ -56,6 +56,7 @@ public class DBHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put("CATEGORY_NAME", name);
             values.put("CATEGORY_ICON", icon);
+            db.insert("category", null, values);
             categoryList = fetchAllCategories();
             return categoryList;
         } finally {
