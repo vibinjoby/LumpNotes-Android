@@ -95,12 +95,19 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         if(v.getId() == R.id.back_button) {
             finish();
         } else if(v.getId() == R.id.save_button) {
+            int categoryId = -1;
             DBHelper dbHelper = new DBHelper(this);
             //Identify the untitled category's index in the list
             if(selectedCategoryPos == -1) {
                 selectedCategoryPos = AppUtils.getUntitledCategoryIndex(categoryList);
+                if(selectedCategoryPos!= -1) {
+                    categoryId = categoryList.get(selectedCategoryPos).getCategoryId();
+                }
+            } else {
+                categoryId = categoryList.get(selectedCategoryPos).getCategoryId();
             }
-            boolean isInserted = dbHelper.saveNotes(categoryList.get(selectedCategoryPos).getCategoryId(),notesTitle.getText().toString(),
+            //If there is no untitled category created before we need to create a new one
+            boolean isInserted = dbHelper.saveNotes(categoryId,notesTitle.getText().toString(),
                     notesDescription.getText().toString(),"27.2038","77.5011");
             if(isInserted) {
                 final Intent data = new Intent();

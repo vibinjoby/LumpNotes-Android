@@ -218,7 +218,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private int fetchUntitledCategoryId() {
-        int categoryId = 0;
+        int categoryId = -1;
         String query = "SELECT CATEGORY_ID FROM CATEGORY WHERE CATEGORY_NAME = ?";
         Cursor c = null;
         try {
@@ -235,7 +235,18 @@ public class DBHelper extends SQLiteOpenHelper {
                 c.close();
             }
         }
+        if(categoryId == -1) {
+            categoryId = createAndFetchUntitledCategoryId();
+        }
         return categoryId;
+    }
+    private int createAndFetchUntitledCategoryId() {
+        ContentValues values = new ContentValues();
+        values.put("CATEGORY_NAME","untitled");
+        values.put("CATEGORY_ICON","default_category");
+        db.insert("CATEGORY",null,values);
+
+        return fetchUntitledCategoryId();
     }
 
 }
