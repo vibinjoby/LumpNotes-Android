@@ -1,6 +1,5 @@
 package com.android.lumpnotes.models;
 
-import java.util.Date;
 import java.util.List;
 
 public class Notes {
@@ -8,16 +7,18 @@ public class Notes {
     private int categoryId;
     private String noteTitle;
     private String noteDescription;
-    private Date noteCreatedTimeStamp;
-    private Date lastEditedTimeStamp;
+    private int audioId;
+    private int imageId;
+    private String noteCreatedTimeStamp;
+    private String lastEditedTimeStamp;
     private String noteLatitudeLoc;
     private String noteLongitudeLoc;
     private List<NotesAudio> audioList;
     private List<NotesImage> imageList;
-    private boolean isDeleted;
-    private boolean isPinned;
-    private Date deletedDate;
-    private Date pinnedDate;
+    private String isDeleted;
+    private String isPinned;
+    private String deletedDate;
+    private String pinnedDate;
     private String address;
 
     public int getNoteId() {
@@ -52,11 +53,11 @@ public class Notes {
         this.noteDescription = noteDescription;
     }
 
-    public Date getNoteCreatedTimeStamp() {
+    public String getNoteCreatedTimeStamp() {
         return noteCreatedTimeStamp;
     }
 
-    public void setNoteCreatedTimeStamp(Date noteCreatedTimeStamp) {
+    public void setNoteCreatedTimeStamp(String noteCreatedTimeStamp) {
         this.noteCreatedTimeStamp = noteCreatedTimeStamp;
     }
 
@@ -92,35 +93,35 @@ public class Notes {
         this.imageList = imageList;
     }
 
-    public boolean isDeleted() {
+    public String isDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDeleted(String deleted) {
         isDeleted = deleted;
     }
 
-    public boolean isPinned() {
+    public String isPinned() {
         return isPinned;
     }
 
-    public void setPinned(boolean pinned) {
+    public void setPinned(String pinned) {
         isPinned = pinned;
     }
 
-    public Date getDeletedDate() {
+    public String getDeletedDate() {
         return deletedDate;
     }
 
-    public void setDeletedDate(Date deletedDate) {
+    public void setDeletedDate(String deletedDate) {
         this.deletedDate = deletedDate;
     }
 
-    public Date getPinnedDate() {
+    public String getPinnedDate() {
         return pinnedDate;
     }
 
-    public void setPinnedDate(Date pinnedDate) {
+    public void setPinnedDate(String pinnedDate) {
         this.pinnedDate = pinnedDate;
     }
 
@@ -132,12 +133,28 @@ public class Notes {
         this.address = address;
     }
 
-    public Date getLastEditedTimeStamp() {
+    public String getLastEditedTimeStamp() {
         return lastEditedTimeStamp;
     }
 
-    public void setLastEditedTimeStamp(Date lastEditedTimeStamp) {
+    public void setLastEditedTimeStamp(String lastEditedTimeStamp) {
         this.lastEditedTimeStamp = lastEditedTimeStamp;
+    }
+
+    public int getAudioId() {
+        return audioId;
+    }
+
+    public void setAudioId(int audioId) {
+        this.audioId = audioId;
+    }
+
+    public int getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(int imageId) {
+        this.imageId = imageId;
     }
 
     @Override
@@ -147,8 +164,10 @@ public class Notes {
                 ", categoryId=" + categoryId +
                 ", noteTitle='" + noteTitle + '\'' +
                 ", noteDescription='" + noteDescription + '\'' +
-                ", noteCreatedTimeStamp='" + noteCreatedTimeStamp + '\'' +
-                ", lastEditedTimeStamp='" + lastEditedTimeStamp + '\'' +
+                ", audioId=" + audioId +
+                ", imageId=" + imageId +
+                ", noteCreatedTimeStamp=" + noteCreatedTimeStamp +
+                ", lastEditedTimeStamp=" + lastEditedTimeStamp +
                 ", noteLatitudeLoc='" + noteLatitudeLoc + '\'' +
                 ", noteLongitudeLoc='" + noteLongitudeLoc + '\'' +
                 ", audioList=" + audioList +

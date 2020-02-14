@@ -32,11 +32,12 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private PopupMenu popupMenu;
     public FragmentManager fragmentManager;
     private Context context;
-    public int selectedCategory = -1;
+    public int selectedCategory = 1;
     private static int TYPE_ADD_CATEGORY = 1;
     private static int TYPE_ALL_CATEGORY = 2;
     public RecyclerView recyclerView;
     private CategoryRVAdapter adapterObj;
+    private NotesRVAdapter notesAdapterobj;
 
     public static class CategoryVH extends RecyclerView.ViewHolder {
         public ImageView categoryIcBorder;
@@ -120,6 +121,9 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 @Override
                 public void onClick(View v) {
                     selectedCategory = position;
+                    if(notesAdapterobj!=null) {
+                        notesAdapterobj.setNotesList(categoryList.get(position - 1).getNotesList());
+                    }
                     notifyDataSetChanged();
                 }
             });
@@ -196,7 +200,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public void notifyChangeForInsert(List<Category> categoryList) {
         this.categoryList = categoryList;
-        selectedCategory = -1;
+        selectedCategory = categoryList.size();
         notifyDataSetChanged();
         recyclerView.scrollToPosition(categoryList.size());
     }
@@ -204,13 +208,13 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public void notifyChangeForDeletion(List<Category> categoryList,int position) {
         this.categoryList = categoryList;
         AppUtils.showToastMessage(context,"Category deleted Successfully",true);
-        selectedCategory = -1;
+        selectedCategory = 1;
         notifyDataSetChanged();
         recyclerView.smoothScrollToPosition(position);
     }
 
     public void notifyChangeForEdit(int position) {
-        selectedCategory = -1;
+        selectedCategory = position+1;
         notifyDataSetChanged();
         recyclerView.scrollToPosition(position + 1);
     }
@@ -219,4 +223,9 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         this.categoryList.clear();
         this.categoryList.addAll(categoryLst);
     }
+
+    public void setNotesAdapterobj(NotesRVAdapter notesAdapterobj) {
+        this.notesAdapterobj = notesAdapterobj;
+    }
+
 }

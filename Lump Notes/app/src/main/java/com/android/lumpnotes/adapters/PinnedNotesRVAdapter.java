@@ -12,6 +12,9 @@ import com.android.lumpnotes.R;
 import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.utils.AppUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class PinnedNotesRVAdapter extends RecyclerView.Adapter<PinnedNotesRVAdapter.NotesViewHolder> {
@@ -49,8 +52,13 @@ public class PinnedNotesRVAdapter extends RecyclerView.Adapter<PinnedNotesRVAdap
         if(!isTestData) {
             holder.locationTxt.setText(pinnedNotes.get(position).getAddress());
             holder.notesTitle.setText(pinnedNotes.get(position).getNoteTitle());
-            holder.notesEditedDate.setText(AppUtils.getDatefromTimeStamp(pinnedNotes.get(position).getLastEditedTimeStamp()));
-            holder.notesEditedTime.setText(AppUtils.getTimefromTimeStamp(pinnedNotes.get(position).getLastEditedTimeStamp()));
+            try {
+                Date editedDate = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").parse(pinnedNotes.get(position).getLastEditedTimeStamp());
+                holder.notesEditedDate.setText(AppUtils.getDatefromTimeStamp(editedDate));
+                holder.notesEditedTime.setText(AppUtils.getTimefromTimeStamp(editedDate));
+            } catch(ParseException e) {
+                e.printStackTrace();
+            }
         }
     }
 

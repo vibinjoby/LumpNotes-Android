@@ -1,6 +1,7 @@
 package com.android.lumpnotes.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +12,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.lumpnotes.R;
+import com.android.lumpnotes.activity.AddNotesActivity;
+import com.android.lumpnotes.models.EmptyNotes;
+import com.android.lumpnotes.models.Notes;
+
+import java.util.List;
 
 public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHolder> {
-    private String[] notesArr;
-    private Context contextObj;
+    private List<Notes> notesList;
+    private EmptyNotes emptyNotes;
+    private Context context;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView notesIcView;
@@ -31,9 +38,10 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHo
         }
     }
 
-    public NotesRVAdapter(Context contextObj, String[] notesArr) {
-        this.notesArr = notesArr;
-        this.contextObj = contextObj;
+    public NotesRVAdapter(List<Notes> notesList,EmptyNotes emptyNotes,Context context) {
+        this.notesList = notesList;
+        this.emptyNotes = emptyNotes;
+        this.context = context;
     }
 
 
@@ -49,22 +57,38 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHo
 
     @Override
     public void onBindViewHolder(@NonNull NotesRVAdapter.MyViewHolder holder, final int position) {
-        holder.noteTitle.setText(notesArr[position]);
+        holder.noteTitle.setText(notesList.get(position).getNoteTitle());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("item clicked" + notesArr[position]);
+                if(notesList!=null) {
+                    Intent i=new Intent(context, AddNotesActivity.class);
+                    i.putExtra("notesTitle", notesList.get(position).getNoteTitle());
+                    i.putExtra("notesDescription", notesList.get(position).getNoteDescription());
+                    context.startActivity(i);
+                }
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return notesArr.length;
+        if(notesList!=null) {
+            emptyNotes.getEmptyNotesView().setVisibility(View.GONE);
+            emptyNotes.getSearchIcon().setVisibility(View.VISIBLE);
+            emptyNotes.getSearchTxt().setVisibility(View.VISIBLE);
+            return notesList.size();
+        } else {
+            emptyNotes.getEmptyNotesView().setVisibility(View.VISIBLE);
+            emptyNotes.getSearchIcon().setVisibility(View.GONE);
+            emptyNotes.getSearchTxt().setVisibility(View.GONE);
+            return 0;
+        }
     }
 
-    public Context getContext() {
-        return contextObj;
+    public void setNotesList(List<Notes> notesList) {
+        this.notesList = notesList;
+        notifyDataSetChanged();
     }
 }

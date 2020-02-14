@@ -1,5 +1,7 @@
 package com.android.lumpnotes;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,11 +20,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.android.lumpnotes.activity.AddNotesActivity;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.adapters.HorizontalSpaceItemDecoration;
 import com.android.lumpnotes.adapters.NotesRVAdapter;
 import com.android.lumpnotes.adapters.PinnedNotesRVAdapter;
 import com.android.lumpnotes.adapters.TrashNotesRVAdapter;
+import com.android.lumpnotes.models.EmptyNotes;
 import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.swipes.SwipeHelper;
 import com.android.lumpnotes.dao.DBHelper;
@@ -67,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         notesRv = findViewById(R.id.notes_rv);
 
+        //Initializing the model object for passing it to notes adapter
+        EmptyNotes emptyNotes = new EmptyNotes();
+        emptyNotes.setEmptyNotesView(emptyNotesView);
+        emptyNotes.setSearchIcon(searchIcon);
+        emptyNotes.setSearchTxt(searchTxt);
+
         categoryRV.setHasFixedSize(false);
         notesRv.setHasFixedSize(false);
 
@@ -74,8 +84,14 @@ public class MainActivity extends AppCompatActivity {
         categoryRV.setAdapter(categoryRVAdapter);
 
         //Notes Recycler View
-        notesRVAdapter = new NotesRVAdapter(this,new String[]{"firstNote","second note","third note"});
+        if(categoryList != null && !categoryList.isEmpty()) {
+            notesRVAdapter = new NotesRVAdapter(categoryList.get(0).getNotesList(),emptyNotes,this);
+        } else {
+            notesRVAdapter = new NotesRVAdapter(null,emptyNotes,this);
+        }
         notesRv.setAdapter(notesRVAdapter);
+        //Set the notes adapter obj to category RV adapter for on click event to update
+        categoryRVAdapter.setNotesAdapterobj(notesRVAdapter);
         SwipeHelper swipeHelper = new SwipeHelper(this, notesRv,60,60) {
             @Override
             public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
@@ -126,14 +142,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // If there is no data in the notes update the UI accordingly
-        if (categoryList.size() == 0) {
-            notesRv.setVisibility(View.GONE);
-            searchTxt.setVisibility(View.GONE);
-            searchIcon.setVisibility(View.GONE);
-            emptyNotesView.setVisibility(View.VISIBLE);
-        } else {
-            emptyNotesView.setVisibility(View.GONE);
-        }
 
         // Bottom Navigation View
         final Menu menu = bottomNavigationView.getMenu();
@@ -352,5 +360,17 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2,1);
         deleteNotesRV.setLayoutManager(layoutManager);
         deleteNotesRV.setAdapter(adapter);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == Activity.RESULT_OK) {
+            categoryList = new DBHelper(this).fetchAllCategories();
+        } else {
+            // AnotherActivity was not successful. No data to retrieve.
+        }
+
     }
 }

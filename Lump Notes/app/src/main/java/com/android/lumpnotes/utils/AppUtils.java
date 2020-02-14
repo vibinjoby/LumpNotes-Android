@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.android.lumpnotes.R;
 import com.android.lumpnotes.models.Notes;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -101,20 +102,35 @@ public class AppUtils {
         List<Notes> dayWiseList = new ArrayList<>();
         if(searchForToday) {
             for (Notes notes : notesList) {
-                if(isToday(notes.getPinnedDate())) {
-                    dayWiseList.add(notes);
+                try {
+                    Date pinnedDate = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").parse(notes.getPinnedDate());
+                    if (isToday(pinnedDate)) {
+                        dayWiseList.add(notes);
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
             }
         } else if(searchForYesterday) {
             for (Notes notes : notesList) {
-                if(isYesterday(notes.getPinnedDate())) {
-                    dayWiseList.add(notes);
+                try {
+                    Date pinnedDate = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").parse(notes.getPinnedDate());
+                    if(isYesterday(pinnedDate)) {
+                        dayWiseList.add(notes);
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
             }
         } else {
             for (Notes notes : notesList) {
-                if(!isToday(notes.getPinnedDate()) && !isYesterday(notes.getPinnedDate())) {
-                    dayWiseList.add(notes);
+                try {
+                    Date pinnedDate = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").parse(notes.getPinnedDate());
+                    if(!isToday(pinnedDate) && !isYesterday(pinnedDate)) {
+                        dayWiseList.add(notes);
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
             }
         }
