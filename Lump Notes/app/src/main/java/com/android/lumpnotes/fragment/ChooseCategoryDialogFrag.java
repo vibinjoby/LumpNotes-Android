@@ -1,5 +1,7 @@
 package com.android.lumpnotes.fragment;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,21 +18,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.lumpnotes.R;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.adapters.ChooseCategoryRVAdapter;
+import com.android.lumpnotes.listeners.DialogFragmentActivityListener;
+import com.android.lumpnotes.listeners.RecyclerViewClickListener;
 import com.android.lumpnotes.models.Category;
 
 import java.util.List;
 
-public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWatcher  {
+public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWatcher, RecyclerViewClickListener {
     private List<Category> categoryList;
     private CategoryRVAdapter categoryRVAdapter;
-    public ChooseCategoryDialogFrag(List<Category> categoryList,CategoryRVAdapter categoryRVAdapter) {
+    private int selectedCategoryId;
+    private DialogFragmentActivityListener listener;
+    public ChooseCategoryDialogFrag(List<Category> categoryList,CategoryRVAdapter categoryRVAdapter,DialogFragmentActivityListener listener) {
         this.categoryList = categoryList;
         this.categoryRVAdapter = categoryRVAdapter;
+        this.listener = listener;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setCancelable(true);
     }
 
     @Override
@@ -38,22 +46,33 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.choose_category_popup,
                 container, false);
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
         TextView textView = view.findViewById(R.id.dialog_search_bar);
         textView.addTextChangedListener(this);
         Button addCategoryBtn = view.findViewById(R.id.add_category_ch_btn);
         addCategoryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dismiss();
-                AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(),categoryRVAdapter,categoryList,false,null);
+                AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(),categoryRVAdapter,categoryList,false,null,listener);
                 dialog.show(getFragmentManager(),dialog.getTag());
+                dismiss();
             }
         });
         RecyclerView chooseCategoryRv = view.findViewById(R.id.choose_category_rv);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this.getContext());
         chooseCategoryRv.setLayoutManager(layoutManager);
-        ChooseCategoryRVAdapter adapter = new ChooseCategoryRVAdapter(categoryList,getResources());
+        ChooseCategoryRVAdapter adapter = new ChooseCategoryRVAdapter(categoryList,getResources(),this);
         chooseCategoryRv.setAdapter(adapter);
+
+        //Close the popup in click of X button
+        view.findViewById(R.id.dismiss_dialog_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
         return view;
     }
 
@@ -70,5 +89,12 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
     @Override
     public void afterTextChanged(Editable s) {
 
+    }
+
+    @Override
+    public void recyclerViewListClicked(View v, int position) {
+        selectedCategoryId = position;
+        listener.onCategorySelection(selectedCategoryId);
+        dismiss();
     }
 }

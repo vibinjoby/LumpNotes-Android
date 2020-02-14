@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.lumpnotes.R;
+import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
 
 import java.text.ParseException;
@@ -135,5 +136,15 @@ public class AppUtils {
             }
         }
         return dayWiseList;
+    }
+
+    public static int getUntitledCategoryIndex(List<Category> categoryList) {
+        int categoryIndex = -1;
+        for(Category category:categoryList) {
+            if(category.getCategoryName().equalsIgnoreCase("untitled")) {
+                categoryIndex = categoryList.indexOf(category);
+            }
+        }
+        return categoryIndex;
     }
 }

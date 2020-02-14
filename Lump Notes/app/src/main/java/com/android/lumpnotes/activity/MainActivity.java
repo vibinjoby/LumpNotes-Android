@@ -370,9 +370,12 @@ public class MainActivity extends AppCompatActivity {
             categoryList = new DBHelper(this).fetchAllCategories();
             categoryRVAdapter.setItems(categoryList);
             if(data!=null && data.getExtras().get("category_id") != null) {
-                if(data.getExtras().get("category_id").equals(0)) {
-                    notesRVAdapter.setNotesList(categoryList.get(0).getNotesList());
-                }
+                int selectedCategoryId = data.getExtras().getInt("category_id");
+                notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId).getNotesList());
+                notesRv.smoothScrollToPosition(notesRv.getBottom());
+                categoryRVAdapter.selectedCategory = selectedCategoryId + 1;
+                categoryRV.smoothScrollToPosition(selectedCategoryId+1);
+                categoryRVAdapter.notifyDataSetChanged();
             }
         }
     }

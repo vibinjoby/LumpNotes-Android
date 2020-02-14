@@ -103,7 +103,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((AddCategoryVH) holder).addCategoryBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null,null);
                     dialog.show(fragmentManager, dialog.getTag());
                 }
             });
@@ -111,7 +111,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((AddCategoryVH) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null,null);
                     dialog.show(fragmentManager,dialog.getTag());
                 }
             });
@@ -166,7 +166,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             public boolean onMenuItemClick(MenuItem item) {
                 System.out.println("edit clicked for " + categoryList.get(position).getCategoryName());
                 AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj
-                        ,categoryList,true,categoryList.get(position));
+                        ,categoryList,true,categoryList.get(position),null);
                 dialog.show(fragmentManager, dialog.getTag());
                 return true;
             }

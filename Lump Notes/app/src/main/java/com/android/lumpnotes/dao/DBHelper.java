@@ -50,12 +50,14 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean saveCategories(String name, String icon) {
+    public List<Category> saveAndFetchCategories(String name, String icon) {
+        List<Category> categoryList = null;
         try {
             ContentValues values = new ContentValues();
             values.put("CATEGORY_NAME", name);
             values.put("CATEGORY_ICON", icon);
-            return db.insert("category", null, values) > 0 ? true : false;
+            categoryList = fetchAllCategories();
+            return categoryList;
         } finally {
             if (db != null) {
                 db.close();
@@ -64,7 +66,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public boolean saveNotes(int category_id, String title, String description, String latitude_loc, String longitude_loc) {
-        if (category_id == 0) {
+        if (category_id == -1) {
             category_id = fetchUntitledCategoryId();
         }
         try {

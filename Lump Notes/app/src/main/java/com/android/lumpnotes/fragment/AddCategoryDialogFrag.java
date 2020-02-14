@@ -20,6 +20,7 @@ import com.android.lumpnotes.R;
 import com.android.lumpnotes.adapters.CategoryIconsAdapter;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.dao.DBHelper;
+import com.android.lumpnotes.listeners.DialogFragmentActivityListener;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.utils.AppUtils;
 
@@ -34,14 +35,16 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
     List<Category> categoryList;
     boolean isEditCategory;
     Category editCategoryObj;
+    DialogFragmentActivityListener listener;
 
-    public AddCategoryDialogFrag(Context contextObj, CategoryRVAdapter adapter,List<Category> categoryList,boolean isEditCategory,
-    Category editCategoryObj) {
+    public AddCategoryDialogFrag(Context contextObj, CategoryRVAdapter adapter, List<Category> categoryList, boolean isEditCategory,
+                                 Category editCategoryObj, DialogFragmentActivityListener listener) {
         this.adapter = adapter;
         this.contextObj = contextObj;
         this.categoryList = categoryList;
         this.isEditCategory = isEditCategory;
         this.editCategoryObj = editCategoryObj;
+        this.listener = listener;
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,12 +100,17 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                         categoryList.add(category);
                         AppUtils.showToastMessage(contextObj, "New category created successfully", true);
                         dismiss();
-                        adapter.notifyChangeForInsert(categoryList);
+                        if(adapter!=null) {
+                            adapter.notifyChangeForInsert(categoryList);
+                        }
                         new Handler().post(new Runnable() {
                             @Override
                             public void run() {
                                 DBHelper dbHelper = new DBHelper(contextObj);
-                                dbHelper.saveCategories(addCategoryText.getText().toString(), selectedCategoryIcon);
+                                categoryList = dbHelper.saveAndFetchCategories(addCategoryText.getText().toString(), selectedCategoryIcon);
+                                if(listener!=null) {
+                                    listener.onNewCategoryCreation(categoryList);
+                                }
                             }
                         });
                     }

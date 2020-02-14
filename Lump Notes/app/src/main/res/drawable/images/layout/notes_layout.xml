@@ -24,10 +24,10 @@
         app:layout_constraintBottom_toBottomOf="@id/notes_header"/>
 
     <Button
-        android:id="@+id/trash_button"
+        android:id="@+id/save_button"
         android:layout_width="22dp"
         android:layout_height="22dp"
-        android:background="@raw/bin"
+        android:background="@raw/save"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/notes_header"
         app:layout_constraintRight_toRightOf="@id/notes_header"
@@ -38,7 +38,7 @@
         android:layout_width="22dp"
         android:layout_height="22dp"
         android:background="@raw/bookmark"
-        app:layout_constraintRight_toLeftOf="@id/trash_button"
+        app:layout_constraintRight_toLeftOf="@id/save_button"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginRight="20dp"
         app:layout_constraintBottom_toBottomOf="@id/notes_header"/>
