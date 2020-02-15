@@ -1,5 +1,6 @@
 package com.android.lumpnotes.fragment;
 
+import android.app.ActionBar;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -38,7 +40,6 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setCancelable(true);
     }
 
     @Override
@@ -47,6 +48,7 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
         final View view = inflater.inflate(R.layout.choose_category_popup,
                 container, false);
         if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
         TextView textView = view.findViewById(R.id.dialog_search_bar);

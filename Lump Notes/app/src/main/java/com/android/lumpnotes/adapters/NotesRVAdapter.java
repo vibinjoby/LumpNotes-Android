@@ -15,6 +15,7 @@ import com.android.lumpnotes.R;
 import com.android.lumpnotes.activity.AddNotesActivity;
 import com.android.lumpnotes.models.EmptyNotes;
 import com.android.lumpnotes.models.Notes;
+import com.google.gson.Gson;
 
 import java.util.List;
 
@@ -64,8 +65,8 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.MyViewHo
             public void onClick(View v) {
                 if(notesList!=null) {
                     Intent i=new Intent(activity.getApplicationContext(), AddNotesActivity.class);
-                    i.putExtra("notesTitle", notesList.get(position).getNoteTitle());
-                    i.putExtra("notesDescription", notesList.get(position).getNoteDescription());
+                    String selectedNote = new Gson().toJson(notesList.get(position));
+                    i.putExtra("selectedNote",selectedNote);
                     activity.startActivityForResult(i,1);
                 }
             }

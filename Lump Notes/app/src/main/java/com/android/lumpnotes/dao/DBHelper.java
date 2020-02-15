@@ -66,6 +66,27 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+    public boolean editNotes(int noteId, String title, String description, String latitude_loc, String longitude_loc) {
+        try {
+            Date date = Calendar.getInstance().getTime();
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            String currentDate = dateFormat.format(date);
+            ContentValues values = new ContentValues();
+            values.put("NOTE_TITLE", title);
+            values.put("NOTE_DESCRIPTION", description);
+            values.put("NOTE_LATITUDE_LOC", latitude_loc);
+            values.put("NOTE_LONGITUDE_LOC", longitude_loc);
+            values.put("NOTE_EDITED_DATE",currentDate);
+            values.put("IS_PINNED","N");
+            values.put("IS_DELETED","N");
+            return db.update("notes", values, "NOTE_ID="+noteId,null) > 0 ? true : false;
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
+
     public boolean saveNotes(int category_id, String title, String description, String latitude_loc, String longitude_loc) {
         if (category_id == -1) {
             category_id = fetchUntitledCategoryId();

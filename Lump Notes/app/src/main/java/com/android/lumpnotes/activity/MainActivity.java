@@ -105,8 +105,6 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(int pos) {
                                 Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
                                 deleteToast.show();
-                                System.out.println(categoryList.get(categoryRVAdapter.selectedCategory));
-                                System.out.println(notesRVAdapter.getItemId(pos));
                             }
                         }
                 ));
@@ -371,11 +369,18 @@ public class MainActivity extends AppCompatActivity {
             categoryRVAdapter.setItems(categoryList);
             if(data!=null && data.getExtras().get("category_id") != null) {
                 int selectedCategoryId = data.getExtras().getInt("category_id");
-                notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId).getNotesList());
-                notesRv.smoothScrollToPosition(notesRv.getBottom());
-                categoryRVAdapter.selectedCategory = selectedCategoryId + 1;
-                categoryRV.smoothScrollToPosition(selectedCategoryId+1);
-                categoryRVAdapter.notifyDataSetChanged();
+                if(selectedCategoryId != -1) {
+                    notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId).getNotesList());
+                    notesRv.smoothScrollToPosition(notesRv.getBottom());
+                    categoryRVAdapter.selectedCategory = selectedCategoryId + 1;
+                    categoryRV.smoothScrollToPosition(selectedCategoryId + 1);
+                    categoryRVAdapter.notifyDataSetChanged();
+                } else {
+                    selectedCategoryId = categoryRVAdapter.selectedCategory;
+                    if(selectedCategoryId!=-1) {
+                        notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId - 1).getNotesList());
+                    }
+                }
             }
         }
     }

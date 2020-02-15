@@ -15,6 +15,7 @@ import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.fragment.ChooseCategoryDialogFrag;
 import com.android.lumpnotes.listeners.DialogFragmentActivityListener;
 import com.android.lumpnotes.models.Category;
+import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.utils.AppUtils;
 import com.google.gson.Gson;
 
@@ -29,6 +30,9 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     Button imageUploadBtn, audioBtn;
     EditText notesTitle,notesDescription;
     int selectedCategoryPos = -1;
+    boolean isEditNote = false;
+    boolean isInserted = false;
+    Notes notes = null;
 
     List<Category> categoryList = null;
     CategoryRVAdapter categoryRVAdapter = null;
@@ -50,9 +54,10 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         //}
 
         // Getting data for intent
-        Intent editIntent = getIntent();
-        String title = editIntent.getStringExtra("notesTitle");
-        String description = editIntent.getStringExtra("notesDescription");
+        if(getIntent().getExtras().getString("selectedNote")!=null) {
+            String selectedNote = getIntent().getExtras().getString("selectedNote");
+            notes = new Gson().fromJson(selectedNote, Notes.class);
+        }
 
         if(categoryList != null ) {
             ChooseCategoryDialogFrag dialog = new ChooseCategoryDialogFrag(categoryList,null,this);
@@ -77,11 +82,10 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         notesTitle = findViewById(R.id.notes_title);
         notesDescription = findViewById(R.id.notes_description);
 
-        if(title!=null && !title.isEmpty()) {
-            notesTitle.setText(title);
-        }
-        if(description!=null && !description.isEmpty()) {
-            notesDescription.setText(description);
+        if(notes != null) {
+            notesTitle.setText(notes.getNoteTitle());
+            notesDescription.setText(notes.getNoteDescription());
+            isEditNote = true;
         }
     }
 
@@ -95,30 +99,45 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         if(v.getId() == R.id.back_button) {
             finish();
         } else if(v.getId() == R.id.save_button) {
-            int categoryId = -1;
-            DBHelper dbHelper = new DBHelper(this);
-            //Identify the untitled category's index in the list
-            if(selectedCategoryPos == -1) {
-                selectedCategoryPos = AppUtils.getUntitledCategoryIndex(categoryList);
-                if(selectedCategoryPos!= -1) {
+            if(notesTitle.getText()!=null && !notesTitle.getText().toString().isEmpty()) {
+                int categoryId = -1;
+                DBHelper dbHelper = new DBHelper(this);
+                //Identify the untitled category's index in the list
+                if(isEditNote) {
+                    categoryId = notes.getCategoryId();
+                } else if (selectedCategoryPos == -1) {
+                    selectedCategoryPos = AppUtils.getUntitledCategoryIndex(categoryList);
+                    if (selectedCategoryPos != -1) {
+                        categoryId = categoryList.get(selectedCategoryPos).getCategoryId();
+                    }
+                } else {
                     categoryId = categoryList.get(selectedCategoryPos).getCategoryId();
                 }
+                //If there is no untitled category created before we need to create a new one
+                if(isEditNote) {
+                    isInserted = dbHelper.editNotes(notes.getNoteId(),notesTitle.getText().toString(),
+                            notesDescription.getText().toString(), "27.2038", "77.5011");
+                } else {
+                    isInserted = dbHelper.saveNotes(categoryId, notesTitle.getText().toString(),
+                            notesDescription.getText().toString(), "27.2038", "77.5011");
+                }
+                if (isInserted) {
+                    final Intent data = new Intent();
+                    data.putExtra("category_id", selectedCategoryPos);
+                    setResult(Activity.RESULT_OK, data);
+                    if(categoryList!=null) {
+                        AppUtils.showToastMessage(this, "Notes Saved Successfully in the " + categoryList.get(selectedCategoryPos).getCategoryName() + " Category", true);
+                    } else {
+                        AppUtils.showToastMessage(this, "Notes Saved Successfully ", true);
+                    }
+                    finish();
+                } else {
+                    setResult(Activity.RESULT_CANCELED);
+                    AppUtils.showToastMessage(this, "Notes failed to save", false);
+                    finish();
+                }
             } else {
-                categoryId = categoryList.get(selectedCategoryPos).getCategoryId();
-            }
-            //If there is no untitled category created before we need to create a new one
-            boolean isInserted = dbHelper.saveNotes(categoryId,notesTitle.getText().toString(),
-                    notesDescription.getText().toString(),"27.2038","77.5011");
-            if(isInserted) {
-                final Intent data = new Intent();
-                data.putExtra("category_id", selectedCategoryPos);
-                setResult(Activity.RESULT_OK,data);
-                AppUtils.showToastMessage(this,"Notes Saved Successfully in the "+categoryList.get(selectedCategoryPos).getCategoryName()+" Category",true);
-                finish();
-            } else {
-                setResult(Activity.RESULT_CANCELED);
-                AppUtils.showToastMessage(this,"Notes failed to save",false);
-                finish();
+                notesTitle.setError("Title is mandatory for saving Note");
             }
         }
     }

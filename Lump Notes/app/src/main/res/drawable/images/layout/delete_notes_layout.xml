@@ -54,6 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:layout_alignTop="@id/delete_notes_txt"
-        android:layout_alignLeft="@id/delete_notes_txt"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"/>
 </RelativeLayout>

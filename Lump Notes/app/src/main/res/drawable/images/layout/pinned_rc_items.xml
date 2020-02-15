@@ -52,11 +52,11 @@
 
         <TextView
             android:id="@+id/address_txt"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:lines="2"
-            android:text="Location: 2055 Sheppard Ave E, Toronto, \nON M2J 1W6, Canada"
+            android:scrollHorizontally="false"
+            android:text="Location: 2055 Sheppard Ave E, Toronto,ON M2J 1W6, Canada"
             app:layout_constraintLeft_toRightOf="@id/map_view"
             app:layout_constraintRight_toRightOf="@id/pinned_notes_date"
             app:layout_constraintTop_toBottomOf="@id/pinned_notes_title"/>
