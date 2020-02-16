@@ -34,7 +34,7 @@
         app:layout_constraintTop_toTopOf="@id/dialog_header"
         app:layout_constraintBottom_toBottomOf="@id/dialog_header"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:fontFamily="@font/helvetica_neue_medium"/>
+        android:fontFamily="@font/helvetica_neu_bold"/>
 
     <View
         android:id="@+id/search_bar_container"

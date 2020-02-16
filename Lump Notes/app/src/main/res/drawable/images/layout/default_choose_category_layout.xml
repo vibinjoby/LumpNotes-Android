@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:text="You haven’t created any category yet"
         android:textColor="#969393"
-        android:textSize="16dp"
+        android:textSize="14dp"
         android:fontFamily="@font/helvetica_neu_bold"/>
 
     <TextView
@@ -25,6 +25,6 @@
         android:lines="2"
         android:text="Tap “+” button below to create a new category."
         android:textColor="#969393"
-        android:textSize="16dp"/>
+        android:textSize="14dp"/>
 
 </LinearLayout>
