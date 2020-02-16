@@ -26,6 +26,8 @@ import com.android.lumpnotes.adapters.HorizontalSpaceItemDecoration;
 import com.android.lumpnotes.adapters.NotesRVAdapter;
 import com.android.lumpnotes.adapters.PinnedNotesRVAdapter;
 import com.android.lumpnotes.adapters.TrashNotesRVAdapter;
+import com.android.lumpnotes.fragment.ChooseCategoryDialogFrag;
+import com.android.lumpnotes.listeners.DialogFragmentActivityListener;
 import com.android.lumpnotes.models.EmptyNotes;
 import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.swipes.SwipeHelper;
@@ -38,12 +40,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DialogFragmentActivityListener {
     private RecyclerView.LayoutManager layoutManager;
     private RecyclerView categoryRV;
     private CategoryRVAdapter categoryRVAdapter;
     private NotesRVAdapter notesRVAdapter;
-    private boolean isTestData = false;
 
     private RecyclerView notesRv;
     private Button addButton;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private Button searchIcon;
     private List<Category> categoryList;
     private List<Notes> pinnedNotesList;
+    private Notes movableNotesObj;
 
     private BottomNavigationView bottomNavigationView;
     private Context context;
@@ -60,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
     PinnedNotesRVAdapter yesterdaysAdapter = null;
     PinnedNotesRVAdapter oldAdapter = null;
 
-    List<Notes> notesList = null;
     List<Notes> dayWiseList = null;
 
     TextView todayTxt = null;
@@ -70,12 +71,14 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView todayRV = null;
     RecyclerView yesterdayRV = null;
     RecyclerView oldRV = null;
+    DialogFragmentActivityListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = this;
+        listener = this;
         categoryList = new DBHelper(this).fetchAllCategories();
         pinnedNotesList = new DBHelper(this).fetchPinnedNotes();
 
@@ -177,25 +180,24 @@ public class MainActivity extends AppCompatActivity {
                         new SwipeHelper.UnderlayButtonClickListener() {
                             @Override
                             public void onClick(int pos) {
-                                Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
-                                if(viewHolder instanceof NotesRVAdapter.NotesRV_VH) {
-                                    int selectedCategory = categoryRVAdapter.selectedCategory;
-                                    if(selectedCategory!=-1) {
-                                        try {
-                                            Notes noteObj = categoryList.get(selectedCategory - 1).getNotesList().get(viewHolder.getAdapterPosition());
-                                            boolean isDeleted = new DBHelper(context).deleteRecoverNote(noteObj.getNoteId(),"Y");
-                                            if (isDeleted) {
-                                                categoryList.get(selectedCategory - 1).getNotesList().remove(noteObj);
-                                                categoryRVAdapter.setItems(categoryList);
-                                                notesRVAdapter.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
-                                                notesRVAdapter.notifyDataSetChanged();
-                                            }
-                                        } catch(Exception e) {
-                                            e.printStackTrace();
+                            if(viewHolder instanceof NotesRVAdapter.NotesRV_VH) {
+                                int selectedCategory = categoryRVAdapter.selectedCategory;
+                                if(selectedCategory!=-1) {
+                                    try {
+                                        Notes noteObj = categoryList.get(selectedCategory - 1).getNotesList().get(viewHolder.getAdapterPosition());
+                                        boolean isDeleted = new DBHelper(context).deleteRecoverNote(noteObj.getNoteId(),"Y");
+                                        if (isDeleted) {
+                                            AppUtils.showToastMessage(context,"Note Deleted successfully",true);
+                                            categoryList.get(selectedCategory - 1).getNotesList().remove(noteObj);
+                                            categoryRVAdapter.setItems(categoryList);
+                                            notesRVAdapter.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
+                                            notesRVAdapter.notifyDataSetChanged();
                                         }
+                                    } catch(Exception e) {
+                                        e.printStackTrace();
                                     }
                                 }
-                                deleteToast.show();
+                            }
                             }
                         }
                 ));
@@ -207,8 +209,19 @@ public class MainActivity extends AppCompatActivity {
                         new SwipeHelper.UnderlayButtonClickListener() {
                             @Override
                             public void onClick(int pos) {
-                                Toast moveToast =Toast. makeText(getApplicationContext(),"Move clicked",Toast. LENGTH_SHORT);
-                                moveToast.show();
+                                if(viewHolder instanceof NotesRVAdapter.NotesRV_VH) {
+                                    int selectedCategory = categoryRVAdapter.selectedCategory;
+                                    if(selectedCategory!=-1) {
+                                        try {
+                                            movableNotesObj = categoryList.get(selectedCategory - 1).getNotesList().get(viewHolder.getAdapterPosition());
+                                            ChooseCategoryDialogFrag dialogFrag = new ChooseCategoryDialogFrag(categoryList, categoryRVAdapter, listener);
+                                            dialogFrag.show(getSupportFragmentManager(), dialogFrag.getTag());
+                                            dialogFrag.ignoreCategoryPos = categoryRVAdapter.selectedCategory - 1;
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
                             }
                         }
                 ));
@@ -270,160 +283,55 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showPinnedNotes() {
-        SwipeHelper swipeHelper = null;
-        ItemTouchHelper itemTouchHelper = null;
-
-        if(isTestData) {
-            todaysAdapter = new PinnedNotesRVAdapter(null,this);
-            todayRV.setAdapter(todaysAdapter);
-            swipeHelper = new SwipeHelper(this, todayRV,100,60) {
-                @Override
-                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "Delete",
-                            0,
-                            Color.parseColor("#FF3C30"),
-                            new SwipeHelper.UnderlayButtonClickListener() {
-                                @Override
-                                public void onClick(int pos) {
-                                    Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
-                                    deleteToast.show();
-                                }
-                            }
-                    ));
-
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "Move",
-                            0,
-                            Color.parseColor("#0000cc"),
-                            new SwipeHelper.UnderlayButtonClickListener() {
-                                @Override
-                                public void onClick(int pos) {
-                                    Toast moveToast =Toast. makeText(getApplicationContext(),"Move clicked",Toast. LENGTH_SHORT);
-                                    moveToast.show();
-                                }
-                            }
-                    ));
+        try {
+            boolean isEmptyPinnedLayout = true;
+            pinnedNotesList = new DBHelper(this).fetchPinnedNotes();
+            dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, true, false);
+            if (!dayWiseList.isEmpty()) {
+                isEmptyPinnedLayout = false;
+                todayRV.setVisibility(View.VISIBLE);
+                todayTxt.setVisibility(View.VISIBLE);
+                if(todaysAdapter == null) {
+                    todaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+                    todayRV.setAdapter(todaysAdapter);
                 }
-            };
-            itemTouchHelper = new ItemTouchHelper(swipeHelper);
-            itemTouchHelper.attachToRecyclerView(todayRV);
-            yesterdayRV.setAdapter(yesterdaysAdapter);
-            swipeHelper = new SwipeHelper(this, yesterdayRV,100,60) {
-                @Override
-                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "Delete",
-                            0,
-                            Color.parseColor("#FF3C30"),
-                            new SwipeHelper.UnderlayButtonClickListener() {
-                                @Override
-                                public void onClick(int pos) {
-                                    Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
-                                    deleteToast.show();
-                                }
-                            }
-                    ));
-
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "Move",
-                            0,
-                            Color.parseColor("#0000cc"),
-                            new SwipeHelper.UnderlayButtonClickListener() {
-                                @Override
-                                public void onClick(int pos) {
-                                    Toast moveToast =Toast. makeText(getApplicationContext(),"Move clicked",Toast. LENGTH_SHORT);
-                                    moveToast.show();
-                                }
-                            }
-                    ));
-                }
-            };
-            oldRV.setAdapter(oldAdapter);
-            itemTouchHelper = new ItemTouchHelper(swipeHelper);
-            itemTouchHelper.attachToRecyclerView(yesterdayRV);
-            swipeHelper = new SwipeHelper(this, oldRV,100,60) {
-                @Override
-                public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "Delete",
-                            0,
-                            Color.parseColor("#FF3C30"),
-                            new SwipeHelper.UnderlayButtonClickListener() {
-                                @Override
-                                public void onClick(int pos) {
-                                    Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
-                                    deleteToast.show();
-                                }
-                            }
-                    ));
-
-                    underlayButtons.add(new SwipeHelper.UnderlayButton(
-                            "Move",
-                            0,
-                            Color.parseColor("#0000cc"),
-                            new SwipeHelper.UnderlayButtonClickListener() {
-                                @Override
-                                public void onClick(int pos) {
-                                    Toast moveToast =Toast. makeText(getApplicationContext(),"Move clicked",Toast. LENGTH_SHORT);
-                                    moveToast.show();
-                                }
-                            }
-                    ));
-                }
-            };
-            itemTouchHelper = new ItemTouchHelper(swipeHelper);
-            itemTouchHelper.attachToRecyclerView(oldRV);
-        } else {
-            try {
-                boolean isEmptyPinnedLayout = true;
-                pinnedNotesList = new DBHelper(this).fetchPinnedNotes();
-                dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, true, false);
-                if (!dayWiseList.isEmpty()) {
-                    isEmptyPinnedLayout = false;
-                    todayRV.setVisibility(View.VISIBLE);
-                    todayTxt.setVisibility(View.VISIBLE);
-                    if(todaysAdapter == null) {
-                        todaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
-                        todayRV.setAdapter(todaysAdapter);
-                    }
-                    todaysAdapter.setPinnedNotesList(dayWiseList);
-                } else {
-                    todayRV.setVisibility(View.GONE);
-                    todayTxt.setVisibility(View.GONE);
-                }
-
-                dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, true);
-                if (!dayWiseList.isEmpty()) {
-                    isEmptyPinnedLayout = false;
-                    yesterdayRV.setVisibility(View.VISIBLE);
-                    yesterdayTxt.setVisibility(View.VISIBLE);
-                    yesterdaysAdapter.setPinnedNotesList(dayWiseList);
-                } else {
-                    yesterdayRV.setVisibility(View.GONE);
-                    yesterdayTxt.setVisibility(View.GONE);
-                }
-
-                dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, false);
-                if (!dayWiseList.isEmpty()) {
-                    isEmptyPinnedLayout = false;
-                    oldRV.setVisibility(View.VISIBLE);
-                    oldTxt.setVisibility(View.VISIBLE);
-                    oldAdapter.setPinnedNotesList(dayWiseList);
-                } else {
-                    oldRV.setVisibility(View.GONE);
-                    oldTxt.setVisibility(View.GONE);
-                }
-                if(isEmptyPinnedLayout) {
-                    findViewById(R.id.default_pinned_layout).setVisibility(View.VISIBLE);
-                } else {
-                    findViewById(R.id.default_pinned_layout).setVisibility(View.GONE);
-                }
-            } catch(Exception e) {
-                e.printStackTrace();
+                todaysAdapter.setPinnedNotesList(dayWiseList);
+            } else {
+                todayRV.setVisibility(View.GONE);
+                todayTxt.setVisibility(View.GONE);
             }
+
+            dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, true);
+            if (!dayWiseList.isEmpty()) {
+                isEmptyPinnedLayout = false;
+                yesterdayRV.setVisibility(View.VISIBLE);
+                yesterdayTxt.setVisibility(View.VISIBLE);
+                yesterdaysAdapter.setPinnedNotesList(dayWiseList);
+            } else {
+                yesterdayRV.setVisibility(View.GONE);
+                yesterdayTxt.setVisibility(View.GONE);
+            }
+
+            dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, false);
+            if (!dayWiseList.isEmpty()) {
+                isEmptyPinnedLayout = false;
+                oldRV.setVisibility(View.VISIBLE);
+                oldTxt.setVisibility(View.VISIBLE);
+                oldAdapter.setPinnedNotesList(dayWiseList);
+            } else {
+                oldRV.setVisibility(View.GONE);
+                oldTxt.setVisibility(View.GONE);
+            }
+            if(isEmptyPinnedLayout) {
+                findViewById(R.id.default_pinned_layout).setVisibility(View.VISIBLE);
+            } else {
+                findViewById(R.id.default_pinned_layout).setVisibility(View.GONE);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
+
 
     private void showTrashMenuItems() {
         List<Notes> deletedNotes = new DBHelper(this).fetchDeletedNotes();
@@ -476,5 +384,28 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onCategorySelection(int selectedCategoryId) {
+        try {
+            if (movableNotesObj != null) {
+                boolean isUpdated = new DBHelper(this).moveNotes(movableNotesObj.getNoteId(), categoryList.get(selectedCategoryId).getCategoryId());
+                if(isUpdated) {
+                    categoryList = new DBHelper(this).fetchAllCategories();
+                    categoryRVAdapter.setItems(categoryList);
+                    categoryRVAdapter.selectedCategory = selectedCategoryId + 1;
+                    categoryRV.smoothScrollToPosition(selectedCategoryId + 1);
+                    notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId).getNotesList());
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onNewCategoryCreation(List<Category> updatedCategory) {
+
     }
 }

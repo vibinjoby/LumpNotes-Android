@@ -378,4 +378,10 @@ public class DBHelper extends SQLiteOpenHelper {
         return deletedNotesList;
     }
 
+    public boolean moveNotes(int noteId,int destinationCategoryId) {
+        ContentValues values = new ContentValues();
+        values.put("CATEGORY_ID",destinationCategoryId);
+        return db.update("NOTES",values,"NOTE_ID = ?",new String[]{""+noteId})>0?true:false;
+    }
+
 }

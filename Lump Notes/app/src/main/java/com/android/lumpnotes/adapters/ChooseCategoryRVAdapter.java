@@ -20,6 +20,7 @@ public class ChooseCategoryRVAdapter extends RecyclerView.Adapter<ChooseCategory
     private List<Category> categoryList;
     private Resources resourcesObj;
     private RecyclerViewClickListener itemListener;
+    public int ignoreCategoryPos = -1;
     public ChooseCategoryRVAdapter(List<Category> categoryList,Resources resourcesObj, RecyclerViewClickListener itemListener) {
         this.categoryList = categoryList;
         this.resourcesObj = resourcesObj;
@@ -55,20 +56,25 @@ public class ChooseCategoryRVAdapter extends RecyclerView.Adapter<ChooseCategory
 
     @Override
     public void onBindViewHolder(@NonNull ChooseCategoryRVAdapter.ChooseCategoryVH holder, int position) {
-        holder.categoryTitle.setText(categoryList.get(position).getCategoryName());
-        String uri = "com.android.lumpnotes:drawable/"+categoryList.get(position).getCategoryIcon();
-        int res = resourcesObj.getIdentifier(uri, null, null);
-        holder.categoryIcon.setImageResource(res);
-        if(categoryList.get(position).getNotesList()!=null) {
-            int numOfNotes = categoryList.get(position).getNotesList().size();
-            holder.numberOfNotes.setText(numOfNotes + " Notes");
-        } else {
-            holder.numberOfNotes.setText(0 + " Notes");
+        if(ignoreCategoryPos != position) {
+            holder.categoryTitle.setText(categoryList.get(position).getCategoryName());
+            String uri = "com.android.lumpnotes:drawable/" + categoryList.get(position).getCategoryIcon();
+            int res = resourcesObj.getIdentifier(uri, null, null);
+            holder.categoryIcon.setImageResource(res);
+            if (categoryList.get(position).getNotesList() != null) {
+                int numOfNotes = categoryList.get(position).getNotesList().size();
+                holder.numberOfNotes.setText(numOfNotes + " Notes");
+            } else {
+                holder.numberOfNotes.setText(0 + " Notes");
+            }
         }
     }
 
     @Override
     public int getItemCount() {
-        return categoryList.size();
+        if(ignoreCategoryPos == -1) {
+            return categoryList.size();
+        }
+        return  categoryList.size()-1;
     }
 }

@@ -38,7 +38,7 @@
         android:lines="1"
         android:layout_marginTop="60dp"
         android:text="Heart Green"
-        android:textColor="#6B6B6B"
+        android:textColor="#1A1A1A"
         android:textSize="18sp"
         android:fontFamily="@font/muli_bold" />
 

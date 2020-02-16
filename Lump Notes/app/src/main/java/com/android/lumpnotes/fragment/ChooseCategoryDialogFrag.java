@@ -28,7 +28,8 @@ import java.util.List;
 public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWatcher, RecyclerViewClickListener {
     private List<Category> categoryList;
     private CategoryRVAdapter categoryRVAdapter;
-    private int selectedCategoryId;
+    private int selectedCategoryPos;
+    public int ignoreCategoryPos = -1;
     private DialogFragmentActivityListener listener;
     public ChooseCategoryDialogFrag(List<Category> categoryList,CategoryRVAdapter categoryRVAdapter,DialogFragmentActivityListener listener) {
         this.categoryList = categoryList;
@@ -53,14 +54,18 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
         TextView textView = view.findViewById(R.id.dialog_search_bar);
         textView.addTextChangedListener(this);
         Button addCategoryBtn = view.findViewById(R.id.add_category_ch_btn);
-        addCategoryBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(),categoryRVAdapter,categoryList,false,null,listener);
-                dialog.show(getFragmentManager(),dialog.getTag());
-                dismiss();
-            }
-        });
+        if(ignoreCategoryPos == -1) {
+            addCategoryBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(), categoryRVAdapter, categoryList, false, null, listener);
+                    dialog.show(getFragmentManager(), dialog.getTag());
+                    dismiss();
+                }
+            });
+        } else {
+            addCategoryBtn.setVisibility(View.GONE);
+        }
         RecyclerView chooseCategoryRv = view.findViewById(R.id.choose_category_rv);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this.getContext());
         chooseCategoryRv.setLayoutManager(layoutManager);
@@ -94,8 +99,8 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
 
     @Override
     public void recyclerViewListClicked(View v, int position) {
-        selectedCategoryId = position;
-        listener.onCategorySelection(selectedCategoryId);
+        selectedCategoryPos = position;
+        listener.onCategorySelection(selectedCategoryPos);
         dismiss();
     }
 }
