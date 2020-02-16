@@ -145,16 +145,14 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                         List<Category> tempList = new ArrayList<>();
                         tempList.addAll(categoryList);
                         adapter.setItems(tempList);
-                        editChangeListener.onEditChange(categoryList);
+                        //update it top DB
+                        if(editChangeListener!=null) {
+                            editChangeListener.onEditChange(categoryList);
+                        }
+                        DBHelper dbHelper = new DBHelper(contextObj);
+                        dbHelper.updateCategoryName(editCategoryObj.getCategoryId(), addCategoryText.getText().toString(),selectedCategoryIcon);
                         //adapter.notifyDataSetChanged();
                         adapter.notifyChangeForEdit(position);
-                        new Handler().post(new Runnable() {
-                            @Override
-                            public void run() {
-                                DBHelper dbHelper = new DBHelper(contextObj);
-                                dbHelper.updateCategoryName(editCategoryObj.getCategoryId(), addCategoryText.getText().toString(),selectedCategoryIcon);
-                            }
-                        });
                     }
                 }
             }
