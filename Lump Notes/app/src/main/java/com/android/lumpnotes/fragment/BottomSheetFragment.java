@@ -47,7 +47,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(position == 0) {
                     dismiss();
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(),categoryRVAdapter,categoryList,false,null,null);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(),categoryRVAdapter,categoryList,false,null,null,null);
                     dialog.show(fragManager,dialog.getTag());
                 } else {
                     dismiss();

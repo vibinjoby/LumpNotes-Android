@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.lumpnotes.R;
 import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.fragment.AddCategoryDialogFrag;
+import com.android.lumpnotes.listeners.EditChangeListener;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.utils.AppUtils;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements EditChangeListener {
     private List<Category> categoryList;
     private PopupMenu popupMenu;
     public FragmentManager fragmentManager;
@@ -39,6 +40,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public RecyclerView recyclerView;
     private CategoryRVAdapter adapterObj;
     private NotesRVAdapter notesAdapterobj;
+    private EditChangeListener listener;
 
     public static class CategoryVH extends RecyclerView.ViewHolder {
         public ImageView categoryIcBorder;
@@ -67,6 +69,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public CategoryRVAdapter(List<Category> categoryList, FragmentManager fragmentManager,RecyclerView recyclerView) {
         super();
         adapterObj = this;
+        listener = this;
         this.categoryList = categoryList;
         this.fragmentManager = fragmentManager;
         this.recyclerView = recyclerView;
@@ -104,7 +107,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((AddCategoryVH) holder).addCategoryBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null,null);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null,null,null);
                     dialog.show(fragmentManager, dialog.getTag());
                 }
             });
@@ -112,7 +115,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             ((AddCategoryVH) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null,null);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj,categoryList,false,null,null,null);
                     dialog.show(fragmentManager,dialog.getTag());
                 }
             });
@@ -167,7 +170,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             public boolean onMenuItemClick(MenuItem item) {
                 System.out.println("edit clicked for " + categoryList.get(position).getCategoryName());
                 AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(context,adapterObj
-                        ,categoryList,true,categoryList.get(position),null);
+                        ,categoryList,true,categoryList.get(position),null,listener);
                 dialog.show(fragmentManager, dialog.getTag());
                 return true;
             }
@@ -250,6 +253,11 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public void setNotesAdapterobj(NotesRVAdapter notesAdapterobj) {
         this.notesAdapterobj = notesAdapterobj;
+    }
+
+    @Override
+    public void onEditChange(List<Category> categoryList) {
+        this.categoryList = categoryList;
     }
 
 }

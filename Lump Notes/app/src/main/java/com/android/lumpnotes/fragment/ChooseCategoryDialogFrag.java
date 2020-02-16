@@ -59,7 +59,7 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
             addCategoryBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(), categoryRVAdapter, categoryList, false, null, listener);
+                    AddCategoryDialogFrag dialog = new AddCategoryDialogFrag(getContext(), categoryRVAdapter, categoryList, false, null, listener,null);
                     dialog.show(getFragmentManager(), dialog.getTag());
                     dismiss();
                 }

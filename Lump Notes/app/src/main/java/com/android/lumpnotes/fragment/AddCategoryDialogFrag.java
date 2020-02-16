@@ -21,6 +21,7 @@ import com.android.lumpnotes.adapters.CategoryIconsAdapter;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.listeners.DialogFragmentActivityListener;
+import com.android.lumpnotes.listeners.EditChangeListener;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.utils.AppUtils;
 
@@ -36,15 +37,17 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
     boolean isEditCategory;
     Category editCategoryObj;
     DialogFragmentActivityListener listener;
+    EditChangeListener editChangeListener;
 
     public AddCategoryDialogFrag(Context contextObj, CategoryRVAdapter adapter, List<Category> categoryList, boolean isEditCategory,
-                                 Category editCategoryObj, DialogFragmentActivityListener listener) {
+                                 Category editCategoryObj, DialogFragmentActivityListener listener, EditChangeListener editChangeListener) {
         this.adapter = adapter;
         this.contextObj = contextObj;
         this.categoryList = categoryList;
         this.isEditCategory = isEditCategory;
         this.editCategoryObj = editCategoryObj;
         this.listener = listener;
+        this.editChangeListener = editChangeListener;
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -142,6 +145,7 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                         List<Category> tempList = new ArrayList<>();
                         tempList.addAll(categoryList);
                         adapter.setItems(tempList);
+                        editChangeListener.onEditChange(categoryList);
                         //adapter.notifyDataSetChanged();
                         adapter.notifyChangeForEdit(position);
                         new Handler().post(new Runnable() {
