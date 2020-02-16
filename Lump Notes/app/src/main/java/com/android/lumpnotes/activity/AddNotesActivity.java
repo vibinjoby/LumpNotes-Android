@@ -10,7 +10,6 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.lumpnotes.R;
-import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.fragment.ChooseCategoryDialogFrag;
 import com.android.lumpnotes.listeners.DialogFragmentActivityListener;
@@ -19,8 +18,6 @@ import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.utils.AppUtils;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class AddNotesActivity extends AppCompatActivity implements View.OnClickListener, DialogFragmentActivityListener {
@@ -33,33 +30,32 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     boolean isEditNote = false;
     boolean isInserted = false;
     Notes notes = null;
+    boolean isPinned = false;
+    boolean isFromPinnedPage = false;
+    boolean isNewCategoryCreated = false;
 
     List<Category> categoryList = null;
-    CategoryRVAdapter categoryRVAdapter = null;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.notes_layout);
 
-        //Getting addIntent
-        if(getIntent().getExtras().getString("categoryList")!=null) {
-            String listSerializedToJson = getIntent().getExtras().getString("categoryList");
-            Category [] categoryArr = new Gson().fromJson(listSerializedToJson, Category[].class);
-            categoryList = new ArrayList<>(Arrays.asList(categoryArr));
+        if(getIntent().getExtras()!=null && getIntent().getExtras().get("fromPinnedNotes")!=null) {
+            isFromPinnedPage = true;
         }
-        //if(addIntent.getExtras().get("categoryRVAdapter")!=null) {
-          //  categoryRVAdapter = (CategoryRVAdapter)addIntent.getExtras().get("categoryRVAdapter");
-        //}
 
+        //Getting addIntent
+        if(getIntent().getExtras().getString("isAddNote")!=null) {
+            categoryList = new DBHelper(this).fetchAllCategories();
+        }
         // Getting data for intent
         if(getIntent().getExtras().getString("selectedNote")!=null) {
             String selectedNote = getIntent().getExtras().getString("selectedNote");
             notes = new Gson().fromJson(selectedNote, Notes.class);
         }
 
-        if(categoryList != null ) {
+        if(categoryList!=null ) {
             ChooseCategoryDialogFrag dialog = new ChooseCategoryDialogFrag(categoryList,null,this);
             dialog.show(getSupportFragmentManager(),dialog.getTag());
         }
@@ -86,18 +82,31 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             notesTitle.setText(notes.getNoteTitle());
             notesDescription.setText(notes.getNoteDescription());
             isEditNote = true;
+            if(notes.isPinned().equalsIgnoreCase("Y")) {
+                isPinned = true;
+                findViewById(R.id.bookmark_button).setBackgroundResource(R.drawable.pinned_selected);
+            } else {
+                isPinned = false;
+                findViewById(R.id.bookmark_button).setBackgroundResource(R.drawable.bookmark);
+            }
         }
     }
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        if(isNewCategoryCreated) {
+            Intent intent = new Intent();
+            setResult(Activity.RESULT_OK, intent);
+            finish();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.back_button) {
-            finish();
+            onBackPressed();
         } else if(v.getId() == R.id.save_button) {
             if(notesTitle.getText()!=null && !notesTitle.getText().toString().isEmpty()) {
                 int categoryId = -1;
@@ -116,19 +125,30 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 //If there is no untitled category created before we need to create a new one
                 if(isEditNote) {
                     isInserted = dbHelper.editNotes(notes.getNoteId(),notesTitle.getText().toString(),
-                            notesDescription.getText().toString(), "27.2038", "77.5011");
+                            notesDescription.getText().toString(), isPinned,"27.2038", "77.5011");
                 } else {
                     isInserted = dbHelper.saveNotes(categoryId, notesTitle.getText().toString(),
-                            notesDescription.getText().toString(), "27.2038", "77.5011");
+                            notesDescription.getText().toString(), isPinned,"27.2038", "77.5011");
                 }
                 if (isInserted) {
                     final Intent data = new Intent();
                     data.putExtra("category_id", selectedCategoryPos);
+                    if(isFromPinnedPage) {
+                        data.putExtra("fromPinnedNotes","Y");
+                    }
                     setResult(Activity.RESULT_OK, data);
-                    if(categoryList!=null) {
-                        AppUtils.showToastMessage(this, "Notes Saved Successfully in the " + categoryList.get(selectedCategoryPos).getCategoryName() + " Category", true);
+                    if(categoryList!=null && selectedCategoryPos < categoryList.size() && selectedCategoryPos!=-1) {
+                        if(isEditNote) {
+                            AppUtils.showToastMessage(this, "Notes edited Successfully in the " + categoryList.get(selectedCategoryPos).getCategoryName() + " Category", true);
+                        } else {
+                            AppUtils.showToastMessage(this, "Notes Saved Successfully in the " + categoryList.get(selectedCategoryPos).getCategoryName() + " Category", true);
+                        }
                     } else {
-                        AppUtils.showToastMessage(this, "Notes Saved Successfully ", true);
+                        if(isEditNote) {
+                            AppUtils.showToastMessage(this, "Notes edited Successfully", true);
+                        } else {
+                            AppUtils.showToastMessage(this, "Notes Saved Successfully", true);
+                        }
                     }
                     finish();
                 } else {
@@ -139,6 +159,13 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             } else {
                 notesTitle.setError("Title is mandatory for saving Note");
             }
+        } else if(v.getId() == R.id.bookmark_button) {
+            if(isPinned) {
+                v.findViewById(R.id.bookmark_button).setBackgroundResource(R.drawable.bookmark);
+            } else {
+                v.findViewById(R.id.bookmark_button).setBackgroundResource(R.drawable.pinned_selected);
+            }
+            isPinned = !isPinned;
         }
     }
 
@@ -149,6 +176,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onNewCategoryCreation(List<Category> updatedCategory) {
+        isNewCategoryCreated = true;
         this.categoryList = updatedCategory;
         this.selectedCategoryPos = updatedCategory.size() - 1;
     }

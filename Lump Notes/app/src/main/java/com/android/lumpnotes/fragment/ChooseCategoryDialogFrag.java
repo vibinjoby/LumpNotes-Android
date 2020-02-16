@@ -1,6 +1,5 @@
 package com.android.lumpnotes.fragment;
 
-import android.app.ActionBar;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;

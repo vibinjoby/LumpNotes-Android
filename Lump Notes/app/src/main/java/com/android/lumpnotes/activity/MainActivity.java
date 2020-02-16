@@ -1,6 +1,7 @@
 package com.android.lumpnotes.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -14,14 +15,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.android.lumpnotes.R;
-import com.android.lumpnotes.activity.AddNotesActivity;
 import com.android.lumpnotes.adapters.CategoryRVAdapter;
 import com.android.lumpnotes.adapters.HorizontalSpaceItemDecoration;
 import com.android.lumpnotes.adapters.NotesRVAdapter;
@@ -39,14 +38,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.System.in;
-
 public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     private RecyclerView categoryRV;
     private CategoryRVAdapter categoryRVAdapter;
     private NotesRVAdapter notesRVAdapter;
-    private boolean isTestData = true;
+    private boolean isTestData = false;
 
     private RecyclerView notesRv;
     private Button addButton;
@@ -54,14 +51,33 @@ public class MainActivity extends AppCompatActivity {
     private EditText searchTxt;
     private Button searchIcon;
     private List<Category> categoryList;
+    private List<Notes> pinnedNotesList;
 
     private BottomNavigationView bottomNavigationView;
+    private Context context;
+
+    PinnedNotesRVAdapter todaysAdapter = null;
+    PinnedNotesRVAdapter yesterdaysAdapter = null;
+    PinnedNotesRVAdapter oldAdapter = null;
+
+    List<Notes> notesList = null;
+    List<Notes> dayWiseList = null;
+
+    TextView todayTxt = null;
+    TextView yesterdayTxt = null;
+    TextView oldTxt = null;
+
+    RecyclerView todayRV = null;
+    RecyclerView yesterdayRV = null;
+    RecyclerView oldRV = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        context = this;
         categoryList = new DBHelper(this).fetchAllCategories();
+        pinnedNotesList = new DBHelper(this).fetchPinnedNotes();
 
         //Initializing the elements from the view
         categoryRV = findViewById(R.id.category_rv);
@@ -71,6 +87,64 @@ public class MainActivity extends AppCompatActivity {
         searchIcon = findViewById(R.id.notes_searchbtn);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         notesRv = findViewById(R.id.notes_rv);
+        todayTxt = findViewById(R.id.todayTxt);
+        yesterdayTxt = findViewById(R.id.yesterdayTxt);
+        oldTxt = findViewById(R.id.oldTxt);
+
+        todayRV = findViewById(R.id.todayRV);
+        yesterdayRV = findViewById(R.id.yesterdayRV);
+        oldRV = findViewById(R.id.oldRV);
+
+        layoutManager = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        todayRV.setLayoutManager(layoutManager);
+        layoutManager = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        yesterdayRV.setLayoutManager(layoutManager);
+        layoutManager = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        oldRV.setLayoutManager(layoutManager);
+
+        //Pinned notes data population
+        dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, true, false);
+        if (!dayWiseList.isEmpty()) {
+            todaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+            todaysAdapter.setPinnedNotesList(dayWiseList);
+            todayRV.setAdapter(todaysAdapter);
+        } else {
+            todayRV.setVisibility(View.GONE);
+            todayTxt.setVisibility(View.GONE);
+        }
+
+        dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, true);
+        if (!dayWiseList.isEmpty()) {
+            yesterdaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+            yesterdayRV.setAdapter(yesterdaysAdapter);
+        } else {
+            yesterdayRV.setVisibility(View.GONE);
+            yesterdayTxt.setVisibility(View.GONE);
+        }
+
+        dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, false);
+        if (!dayWiseList.isEmpty()) {
+            oldAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+            oldRV.setAdapter(oldAdapter);
+        } else {
+            oldRV.setVisibility(View.GONE);
+            oldTxt.setVisibility(View.GONE);
+        }
 
         //Initializing the model object for passing it to notes adapter
         EmptyNotes emptyNotes = new EmptyNotes();
@@ -95,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         categoryRVAdapter.setNotesAdapterobj(notesRVAdapter);
         SwipeHelper swipeHelper = new SwipeHelper(this, notesRv,60,60) {
             @Override
-            public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+            public void instantiateUnderlayButton(final RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
                         "Delete",
                         0,
@@ -104,6 +178,23 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(int pos) {
                                 Toast deleteToast =Toast. makeText(getApplicationContext(),"Delete clicked",Toast. LENGTH_SHORT);
+                                if(viewHolder instanceof NotesRVAdapter.NotesRV_VH) {
+                                    int selectedCategory = categoryRVAdapter.selectedCategory;
+                                    if(selectedCategory!=-1) {
+                                        try {
+                                            Notes noteObj = categoryList.get(selectedCategory - 1).getNotesList().get(viewHolder.getAdapterPosition());
+                                            boolean isDeleted = new DBHelper(context).deleteRecoverNote(noteObj.getNoteId(),"Y");
+                                            if (isDeleted) {
+                                                categoryList.get(selectedCategory - 1).getNotesList().remove(noteObj);
+                                                categoryRVAdapter.setItems(categoryList);
+                                                notesRVAdapter.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
+                                                notesRVAdapter.notifyDataSetChanged();
+                                            }
+                                        } catch(Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
                                 deleteToast.show();
                             }
                         }
@@ -182,42 +273,9 @@ public class MainActivity extends AppCompatActivity {
         SwipeHelper swipeHelper = null;
         ItemTouchHelper itemTouchHelper = null;
 
-        List<Notes> notesList = new ArrayList<>();
-        List<Notes> dayWiseList = null;
-        PinnedNotesRVAdapter adapter = null;
-
-        TextView todayTxt = findViewById(R.id.todayTxt);
-        TextView yesterdayTxt = findViewById(R.id.yesterdayTxt);
-        TextView oldTxt = findViewById(R.id.oldTxt);
-
-        RecyclerView todayRV = findViewById(R.id.todayRV);
-        RecyclerView yesterdayRV = findViewById(R.id.yesterdayRV);
-        RecyclerView oldRV = findViewById(R.id.oldRV);
-        layoutManager = new LinearLayoutManager(this) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
-        todayRV.setLayoutManager(layoutManager);
-        layoutManager = new LinearLayoutManager(this) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
-        yesterdayRV.setLayoutManager(layoutManager);
-        layoutManager = new LinearLayoutManager(this) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
-        oldRV.setLayoutManager(layoutManager);
-
         if(isTestData) {
-            adapter = new PinnedNotesRVAdapter(null);
-            todayRV.setAdapter(adapter);
+            todaysAdapter = new PinnedNotesRVAdapter(null,this);
+            todayRV.setAdapter(todaysAdapter);
             swipeHelper = new SwipeHelper(this, todayRV,100,60) {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
@@ -250,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
             };
             itemTouchHelper = new ItemTouchHelper(swipeHelper);
             itemTouchHelper.attachToRecyclerView(todayRV);
-            yesterdayRV.setAdapter(adapter);
+            yesterdayRV.setAdapter(yesterdaysAdapter);
             swipeHelper = new SwipeHelper(this, yesterdayRV,100,60) {
                 @Override
                 public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
@@ -281,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
                     ));
                 }
             };
-            oldRV.setAdapter(adapter);
+            oldRV.setAdapter(oldAdapter);
             itemTouchHelper = new ItemTouchHelper(swipeHelper);
             itemTouchHelper.attachToRecyclerView(yesterdayRV);
             swipeHelper = new SwipeHelper(this, oldRV,100,60) {
@@ -317,44 +375,65 @@ public class MainActivity extends AppCompatActivity {
             itemTouchHelper = new ItemTouchHelper(swipeHelper);
             itemTouchHelper.attachToRecyclerView(oldRV);
         } else {
-
-            for (Category category : categoryList) {
-                if (category.getNotesList() != null) {
-                    notesList.addAll(category.getNotesList());
+            try {
+                boolean isEmptyPinnedLayout = true;
+                pinnedNotesList = new DBHelper(this).fetchPinnedNotes();
+                dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, true, false);
+                if (!dayWiseList.isEmpty()) {
+                    isEmptyPinnedLayout = false;
+                    todayRV.setVisibility(View.VISIBLE);
+                    todayTxt.setVisibility(View.VISIBLE);
+                    if(todaysAdapter == null) {
+                        todaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+                        todayRV.setAdapter(todaysAdapter);
+                    }
+                    todaysAdapter.setPinnedNotesList(dayWiseList);
+                } else {
+                    todayRV.setVisibility(View.GONE);
+                    todayTxt.setVisibility(View.GONE);
                 }
-            }
 
-            dayWiseList = AppUtils.getPinnedNotesByDay(notesList, true, false);
-            if (!dayWiseList.isEmpty()) {
-                adapter = new PinnedNotesRVAdapter(dayWiseList);
-                todayRV.setAdapter(adapter);
-            } else {
-                todayRV.setVisibility(View.GONE);
-                todayTxt.setVisibility(View.GONE);
-            }
+                dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, true);
+                if (!dayWiseList.isEmpty()) {
+                    isEmptyPinnedLayout = false;
+                    yesterdayRV.setVisibility(View.VISIBLE);
+                    yesterdayTxt.setVisibility(View.VISIBLE);
+                    yesterdaysAdapter.setPinnedNotesList(dayWiseList);
+                } else {
+                    yesterdayRV.setVisibility(View.GONE);
+                    yesterdayTxt.setVisibility(View.GONE);
+                }
 
-            dayWiseList = AppUtils.getPinnedNotesByDay(notesList, false, true);
-            if (!dayWiseList.isEmpty()) {
-                adapter = new PinnedNotesRVAdapter(dayWiseList);
-                yesterdayRV.setAdapter(adapter);
-            } else {
-                yesterdayRV.setVisibility(View.GONE);
-                yesterdayTxt.setVisibility(View.GONE);
-            }
-
-            dayWiseList = AppUtils.getPinnedNotesByDay(notesList, false, false);
-            if (!dayWiseList.isEmpty()) {
-                adapter = new PinnedNotesRVAdapter(dayWiseList);
-                oldRV.setAdapter(adapter);
-            } else {
-                oldRV.setVisibility(View.GONE);
-                oldTxt.setVisibility(View.GONE);
+                dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, false);
+                if (!dayWiseList.isEmpty()) {
+                    isEmptyPinnedLayout = false;
+                    oldRV.setVisibility(View.VISIBLE);
+                    oldTxt.setVisibility(View.VISIBLE);
+                    oldAdapter.setPinnedNotesList(dayWiseList);
+                } else {
+                    oldRV.setVisibility(View.GONE);
+                    oldTxt.setVisibility(View.GONE);
+                }
+                if(isEmptyPinnedLayout) {
+                    findViewById(R.id.default_pinned_layout).setVisibility(View.VISIBLE);
+                } else {
+                    findViewById(R.id.default_pinned_layout).setVisibility(View.GONE);
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
             }
         }
     }
 
     private void showTrashMenuItems() {
-        TrashNotesRVAdapter adapter = new TrashNotesRVAdapter(null);
+        List<Notes> deletedNotes = new DBHelper(this).fetchDeletedNotes();
+        View emptyDeleteView = findViewById(R.id.default_trash);
+        if(deletedNotes!=null && !deletedNotes.isEmpty()) {
+            emptyDeleteView.setVisibility(View.GONE);
+        } else {
+            emptyDeleteView.setVisibility(View.VISIBLE);
+        }
+        TrashNotesRVAdapter adapter = new TrashNotesRVAdapter(deletedNotes,categoryList,emptyDeleteView,this);
         RecyclerView deleteNotesRV = findViewById(R.id.delete_notes_rv);
         RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2,1);
         deleteNotesRV.setLayoutManager(layoutManager);
@@ -364,24 +443,38 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == Activity.RESULT_OK) {
-            categoryList = new DBHelper(this).fetchAllCategories();
-            categoryRVAdapter.setItems(categoryList);
-            if(data!=null && data.getExtras().get("category_id") != null) {
-                int selectedCategoryId = data.getExtras().getInt("category_id");
-                if(selectedCategoryId != -1) {
-                    notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId).getNotesList());
-                    notesRv.smoothScrollToPosition(notesRv.getBottom());
-                    categoryRVAdapter.selectedCategory = selectedCategoryId + 1;
-                    categoryRV.smoothScrollToPosition(selectedCategoryId + 1);
-                    categoryRVAdapter.notifyDataSetChanged();
-                } else {
-                    selectedCategoryId = categoryRVAdapter.selectedCategory;
-                    if(selectedCategoryId!=-1) {
-                        notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId - 1).getNotesList());
+        try {
+            if (resultCode == Activity.RESULT_OK) {
+                categoryList = new DBHelper(this).fetchAllCategories();
+                categoryRVAdapter.setItems(categoryList);
+                if (data != null && data.getExtras() != null && data.getExtras().get("category_id") != null) {
+                    if(data.getExtras().get("fromPinnedNotes")!=null) {
+                        showPinnedNotes();
                     }
+                    int selectedCategoryId = data.getExtras().getInt("category_id");
+                    if (selectedCategoryId != -1) {
+                        notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId).getNotesList());
+                        notesRv.smoothScrollToPosition(notesRv.getBottom());
+                        categoryRVAdapter.selectedCategory = selectedCategoryId + 1;
+                        categoryRV.smoothScrollToPosition(selectedCategoryId + 1);
+                        categoryRVAdapter.notifyDataSetChanged();
+                    } else {
+                        selectedCategoryId = categoryRVAdapter.selectedCategory;
+                        if (selectedCategoryId != -1) {
+                            notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId - 1).getNotesList());
+                        }
+                    }
+                } else {
+                    // Category created in the notes page but notes not saved
+                    // Then refresh the data from the DB and change the focus to the last created category
+                    categoryRVAdapter.selectedCategory = categoryList.size();
+                    categoryRV.smoothScrollToPosition(categoryList.size());
+                    categoryRVAdapter.notifyDataSetChanged();
+                    notesRVAdapter.setNotesList(null);
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

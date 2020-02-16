@@ -21,6 +21,7 @@ import com.android.lumpnotes.R;
 import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.fragment.AddCategoryDialogFrag;
 import com.android.lumpnotes.models.Category;
+import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.utils.AppUtils;
 
 import java.util.ArrayList;
@@ -175,24 +176,37 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         menu.add("Delete").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.MyDialogTheme);
-                builder.setTitle("Are you sure you want to delete the category " + categoryList.get(position).getCategoryName() + " ?");
-                builder.setMessage("This will be deleted immediately.You can’t undo this action.")
-                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.dismiss();
-                                new DBHelper(context).deleteCategory(categoryList.get(position).getCategoryId());
-                                categoryList.remove(position);
-                                notifyChangeForDeletion(categoryList,position);
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                builder.create();
-                builder.show();
+                boolean isDeleteEligible = true;
+                if(categoryList!=null && categoryList.get(position).getNotesList()!=null) {
+                    for (Notes notes : categoryList.get(position).getNotesList()) {
+                        if (notes.isDeleted().equalsIgnoreCase("N")) {
+                            isDeleteEligible = false;
+                        }
+                    }
+                }
+
+                if(!isDeleteEligible) {
+                    AppUtils.showToastMessage(context,"Category cannot be deleted when notes are present",false);
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.MyDialogTheme);
+                    builder.setTitle("Are you sure you want to delete the category " + categoryList.get(position).getCategoryName() + " ?");
+                    builder.setMessage("This will be deleted immediately.You can’t undo this action.")
+                            .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.dismiss();
+                                    new DBHelper(context).deleteCategory(categoryList.get(position).getCategoryId());
+                                    categoryList.remove(position);
+                                    notifyChangeForDeletion(categoryList, position);
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                    builder.create();
+                    builder.show();
+                }
                 return true;
             }
         });
@@ -212,7 +226,11 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         AppUtils.showToastMessage(context,"Category deleted Successfully",true);
         selectedCategory = 1;
         notifyDataSetChanged();
-        notesAdapterobj.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
+        if(categoryList!=null && selectedCategory < categoryList.size()) {
+            notesAdapterobj.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
+        } else {
+            notesAdapterobj.setNotesList(null);
+        }
         notesAdapterobj.notifyDataSetChanged();
         recyclerView.smoothScrollToPosition(position);
     }
@@ -226,8 +244,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     public void setItems(List<Category> categoryLst) {
-        this.categoryList.clear();
-        this.categoryList.addAll(categoryLst);
+        this.categoryList = categoryLst;
         notifyDataSetChanged();
     }
 

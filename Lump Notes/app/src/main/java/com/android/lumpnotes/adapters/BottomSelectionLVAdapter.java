@@ -46,9 +46,9 @@ public class BottomSelectionLVAdapter extends BaseAdapter {
 
         ImageView selectionImg = convertView.findViewById(R.id.selectionIC);
         if (position == 0) {
-            selectionImg.setImageResource(R.drawable.list);
+            selectionImg.setImageResource(R.drawable.new_category_ic);
         } else {
-            selectionImg.setImageResource(R.drawable.new_note);
+            selectionImg.setImageResource(R.drawable.new_note_ic);
         }
         return convertView;
     }

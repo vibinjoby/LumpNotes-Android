@@ -88,7 +88,7 @@ public class AppUtils {
     }
 
     public static String getTimefromTimeStamp(Date date) {
-        SimpleDateFormat localDateFormat = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat localDateFormat = new SimpleDateFormat("hh:mm a");
         String time = localDateFormat.format(date);
         return  time;
     }
@@ -104,7 +104,7 @@ public class AppUtils {
         if(searchForToday) {
             for (Notes notes : notesList) {
                 try {
-                    Date pinnedDate = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").parse(notes.getPinnedDate());
+                    Date pinnedDate = new SimpleDateFormat("MM/dd/yyyy hh:mm a").parse(notes.getPinnedDate());
                     if (isToday(pinnedDate)) {
                         dayWiseList.add(notes);
                     }
@@ -115,7 +115,7 @@ public class AppUtils {
         } else if(searchForYesterday) {
             for (Notes notes : notesList) {
                 try {
-                    Date pinnedDate = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").parse(notes.getPinnedDate());
+                    Date pinnedDate = new SimpleDateFormat("MM/dd/yyyy hh:mm a").parse(notes.getPinnedDate());
                     if(isYesterday(pinnedDate)) {
                         dayWiseList.add(notes);
                     }
@@ -126,7 +126,7 @@ public class AppUtils {
         } else {
             for (Notes notes : notesList) {
                 try {
-                    Date pinnedDate = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").parse(notes.getPinnedDate());
+                    Date pinnedDate = new SimpleDateFormat("MM/dd/yyyy hh:mm a").parse(notes.getPinnedDate());
                     if(!isToday(pinnedDate) && !isYesterday(pinnedDate)) {
                         dayWiseList.add(notes);
                     }

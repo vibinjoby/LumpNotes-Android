@@ -32,11 +32,14 @@
         android:id="@+id/category_name"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:maxWidth="100dp"
+        android:gravity="center"
         android:layout_gravity="center_horizontal"
+        android:lines="1"
         android:layout_marginTop="60dp"
         android:text="Heart Green"
         android:textColor="#6B6B6B"
-        android:textSize="16sp"
-        app:fontFamily="@font/helvetica_neue_medium" />
+        android:textSize="18sp"
+        android:fontFamily="@font/muli_bold" />
 
 </androidx.cardview.widget.CardView>

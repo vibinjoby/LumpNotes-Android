@@ -66,10 +66,10 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    public boolean editNotes(int noteId, String title, String description, String latitude_loc, String longitude_loc) {
+    public boolean editNotes(int noteId, String title, String description, boolean isPinned,String latitude_loc, String longitude_loc) {
         try {
             Date date = Calendar.getInstance().getTime();
-            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
             String currentDate = dateFormat.format(date);
             ContentValues values = new ContentValues();
             values.put("NOTE_TITLE", title);
@@ -77,7 +77,10 @@ public class DBHelper extends SQLiteOpenHelper {
             values.put("NOTE_LATITUDE_LOC", latitude_loc);
             values.put("NOTE_LONGITUDE_LOC", longitude_loc);
             values.put("NOTE_EDITED_DATE",currentDate);
-            values.put("IS_PINNED","N");
+            values.put("IS_PINNED",isPinned?"Y":"N");
+            if(isPinned) {
+                values.put("NOTE_PINNED_DATE",currentDate);
+            }
             values.put("IS_DELETED","N");
             return db.update("notes", values, "NOTE_ID="+noteId,null) > 0 ? true : false;
         } finally {
@@ -87,13 +90,13 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    public boolean saveNotes(int category_id, String title, String description, String latitude_loc, String longitude_loc) {
+    public boolean saveNotes(int category_id, String title, String description, boolean isPinned,String latitude_loc, String longitude_loc) {
         if (category_id == -1) {
             category_id = fetchUntitledCategoryId();
         }
         try {
             Date date = Calendar.getInstance().getTime();
-            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
             String currentDate = dateFormat.format(date);
             ContentValues values = new ContentValues();
             values.put("CATEGORY_ID", category_id);
@@ -102,7 +105,10 @@ public class DBHelper extends SQLiteOpenHelper {
             values.put("NOTE_LATITUDE_LOC", latitude_loc);
             values.put("NOTE_LONGITUDE_LOC", longitude_loc);
             values.put("NOTE_CREATED_TIMESTAMP",currentDate);
-            values.put("IS_PINNED","N");
+            values.put("IS_PINNED",isPinned?"Y":"N");
+            if(isPinned) {
+                values.put("NOTE_PINNED_DATE",currentDate);
+            }
             values.put("IS_DELETED","N");
             return db.insert("notes", null, values) > 0 ? true : false;
         } finally {
@@ -162,14 +168,26 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void updateCategoryName(int categoryId, String newCategoryName, String categoryIcon) {
-        ContentValues values = new ContentValues();
-        values.put("CATEGORY_NAME", newCategoryName);
-        values.put("CATEGORY_ICON", categoryIcon);
-        db.update("category", values, "category_id = ?", new String[]{"" + categoryId});
+        try {
+            ContentValues values = new ContentValues();
+            values.put("CATEGORY_NAME", newCategoryName);
+            values.put("CATEGORY_ICON", categoryIcon);
+            db.update("category", values, "category_id = ?", new String[]{"" + categoryId});
+        } finally {
+            if(db!=null) {
+                db.close();
+            }
+        }
     }
 
     public void deleteCategory(int categoryId) {
-        db.delete("category", "category_id = ?", new String[]{"" + categoryId});
+        try {
+            db.delete("category", "category_id = ?", new String[]{"" + categoryId});
+        } finally {
+            if(db!=null) {
+                db.close();
+            }
+        }
     }
 
     public List<Category> fetchAllCategories() {
@@ -199,8 +217,8 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor c = null;
         try {
             for (int i = 0; i < categoryList.size(); i++) {
-                String query = "SELECT * FROM NOTES WHERE category_id = ?";
-                c = db.rawQuery(query, new String[]{"" + categoryList.get(i).getCategoryId()});
+                String query = "SELECT * FROM NOTES WHERE category_id = ? AND IS_DELETED = ?";
+                c = db.rawQuery(query, new String[]{"" + categoryList.get(i).getCategoryId(),"N"});
                 if (c.moveToFirst()) {
                     do {
                         Notes notes = new Notes();
@@ -268,6 +286,96 @@ public class DBHelper extends SQLiteOpenHelper {
         db.insert("CATEGORY",null,values);
 
         return fetchUntitledCategoryId();
+    }
+
+    public boolean deleteRecoverNote(int noteId,String value) {
+        try {
+            ContentValues values = new ContentValues();
+            values.put("IS_DELETED", value);
+            return db.update("notes", values, "NOTE_ID=" + noteId, null) > 0 ? true : false;
+        } finally {
+            if(db!=null) {
+                db.close();
+            }
+        }
+    }
+
+    public List<Notes> fetchPinnedNotes() {
+        List<Notes> pinnedNotesList = new ArrayList<>();
+        String query = "SELECT * FROM NOTES WHERE IS_PINNED = ? AND IS_DELETED = ?";
+        Cursor c = null;
+        try {
+            c = db.rawQuery(query, new String[]{"Y","N"});
+            if (c.moveToFirst()) {
+                do {
+                    Notes notes = new Notes();
+                    notes.setNoteId(c.getInt(0));
+                    notes.setCategoryId(c.getInt(1));
+                    notes.setNoteTitle(c.getString(2));
+                    notes.setAudioId(c.getInt(3));
+                    notes.setImageId(c.getInt(4));
+                    notes.setNoteDescription(c.getString(5));
+                    notes.setNoteCreatedTimeStamp(c.getString(6));
+                    notes.setLastEditedTimeStamp(c.getString(7));
+                    notes.setDeletedDate(c.getString(8));
+                    notes.setPinnedDate(c.getString(9));
+                    notes.setNoteLatitudeLoc(c.getString(10));
+                    notes.setNoteLongitudeLoc(c.getString(11));
+                    notes.setPinned(c.getString(12));
+                    notes.setDeleted(c.getString(13));
+                    pinnedNotesList.add(notes);
+                } while (c.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+            if(db!=null) {
+                db.close();
+            }
+        }
+        return pinnedNotesList;
+    }
+
+    public List<Notes> fetchDeletedNotes() {
+        List<Notes> deletedNotesList = new ArrayList<>();
+        String query = "SELECT * FROM NOTES WHERE IS_DELETED = ?";
+        Cursor c = null;
+        try {
+            c = db.rawQuery(query, new String[]{"Y"});
+            if (c.moveToFirst()) {
+                do {
+                    Notes notes = new Notes();
+                    notes.setNoteId(c.getInt(0));
+                    notes.setCategoryId(c.getInt(1));
+                    notes.setNoteTitle(c.getString(2));
+                    notes.setAudioId(c.getInt(3));
+                    notes.setImageId(c.getInt(4));
+                    notes.setNoteDescription(c.getString(5));
+                    notes.setNoteCreatedTimeStamp(c.getString(6));
+                    notes.setLastEditedTimeStamp(c.getString(7));
+                    notes.setDeletedDate(c.getString(8));
+                    notes.setPinnedDate(c.getString(9));
+                    notes.setNoteLatitudeLoc(c.getString(10));
+                    notes.setNoteLongitudeLoc(c.getString(11));
+                    notes.setPinned(c.getString(12));
+                    notes.setDeleted(c.getString(13));
+                    deletedNotesList.add(notes);
+                } while (c.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+            if(db!=null) {
+                db.close();
+            }
+        }
+        return deletedNotesList;
     }
 
 }

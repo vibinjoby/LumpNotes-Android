@@ -27,14 +27,14 @@
         android:textSize="20sp" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_marginTop="58dp"
-        android:layout_marginLeft="12dp"
-        android:textSize="16dp"
+        android:layout_marginLeft="5dp"
+        android:textSize="18dp"
         android:text="Add category"
-        app:fontFamily="@font/helvetica_neue_medium"
+        android:fontFamily="@font/muli_bold"
         android:textColor="#6B6B6B"/>
 
 </androidx.cardview.widget.CardView>
