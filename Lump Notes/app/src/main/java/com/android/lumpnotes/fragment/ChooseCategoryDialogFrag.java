@@ -51,6 +51,7 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
+        View emptyCategoryView = view.findViewById(R.id.default_choose_category_layout);
         TextView textView = view.findViewById(R.id.dialog_search_bar);
         textView.addTextChangedListener(this);
         Button addCategoryBtn = view.findViewById(R.id.add_category_ch_btn);
@@ -80,6 +81,9 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
                 dismiss();
             }
         });
+        if(categoryList == null || (categoryList!=null && categoryList.isEmpty())) {
+            emptyCategoryView.setVisibility(View.VISIBLE);
+        }
         return view;
     }
 
