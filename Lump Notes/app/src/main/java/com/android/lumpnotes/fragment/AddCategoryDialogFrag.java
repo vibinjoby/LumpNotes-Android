@@ -100,17 +100,17 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                             category.setCategoryIcon("default_category");
                         }
                         category.setCategoryName(addCategoryText.getText().toString());
-                        categoryList.add(category);
+                        categoryList.clear();
                         AppUtils.showToastMessage(contextObj, "New category created successfully", true);
-                        dismiss();
-                        if(adapter!=null) {
-                            adapter.notifyChangeForInsert(categoryList);
-                        }
                         DBHelper dbHelper = new DBHelper(contextObj);
                         categoryList = dbHelper.saveAndFetchCategories(addCategoryText.getText().toString(), selectedCategoryIcon);
                         if(listener!=null) {
                             listener.onNewCategoryCreation(categoryList);
                         }
+                        if(adapter!=null) {
+                            adapter.notifyChangeForInsert(categoryList);
+                        }
+                        dismiss();
                     }
                 } else {
                     if(selectedCategoryIcon == null) {

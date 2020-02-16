@@ -59,7 +59,8 @@ public class DBHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put("CATEGORY_NAME", name);
             values.put("CATEGORY_ICON", icon);
-            db.insert("category", null, values);
+            long insertedVal = db.insert("category", null, values);
+            System.out.println(insertedVal);
             categoryList = fetchAllCategories();
             return categoryList;
         } finally {
@@ -199,7 +200,8 @@ public class DBHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put("CATEGORY_NAME", newCategoryName);
             values.put("CATEGORY_ICON", categoryIcon);
-            db.update("category", values, "category_id = ?", new String[]{"" + categoryId});
+            long updatedCount = db.update("category", values, "category_id = ?", new String[]{"" + categoryId});
+            System.out.println(updatedCount);
         } finally {
             if(db!=null) {
                 db.close();
