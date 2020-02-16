@@ -257,6 +257,14 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                             item.setIcon(R.drawable.home_selected);
                             categoryList = new DBHelper(context).fetchAllCategories();
                             categoryRVAdapter.setItems(categoryList);
+                            //If there is any change in the delete/pinned data in the notes should be updated
+                            try {
+                                if(categoryRVAdapter.selectedCategory != -1) {
+                                    notesRVAdapter.setNotesList(categoryList.get(categoryRVAdapter.selectedCategory - 1).getNotesList());
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             menu.findItem(R.id.pinned).setIcon(R.drawable.bookmark);
                             menu.findItem(R.id.bin).setIcon(R.drawable.bin);
                             findViewById(R.id.pinned_layout).setVisibility(View.GONE);
@@ -308,6 +316,10 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                 isEmptyPinnedLayout = false;
                 yesterdayRV.setVisibility(View.VISIBLE);
                 yesterdayTxt.setVisibility(View.VISIBLE);
+                if(yesterdaysAdapter == null) {
+                    yesterdaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+                    yesterdayRV.setAdapter(yesterdaysAdapter);
+                }
                 yesterdaysAdapter.setPinnedNotesList(dayWiseList);
             } else {
                 yesterdayRV.setVisibility(View.GONE);
@@ -319,6 +331,10 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                 isEmptyPinnedLayout = false;
                 oldRV.setVisibility(View.VISIBLE);
                 oldTxt.setVisibility(View.VISIBLE);
+                if(oldAdapter == null) {
+                    oldAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+                    oldRV.setAdapter(oldAdapter);
+                }
                 oldAdapter.setPinnedNotesList(dayWiseList);
             } else {
                 oldRV.setVisibility(View.GONE);
