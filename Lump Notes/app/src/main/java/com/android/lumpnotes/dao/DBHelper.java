@@ -53,6 +53,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public List<Category> saveAndFetchCategories(String name, String icon) {
         List<Category> categoryList = null;
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             ContentValues values = new ContentValues();
             values.put("CATEGORY_NAME", name);
             values.put("CATEGORY_ICON", icon);
@@ -62,12 +65,16 @@ public class DBHelper extends SQLiteOpenHelper {
         } finally {
             if (db != null) {
                 db.close();
+                db=null;
             }
         }
     }
 
     public boolean editNotes(int noteId, String title, String description, boolean isPinned,String latitude_loc, String longitude_loc) {
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             Date date = Calendar.getInstance().getTime();
             DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
             String currentDate = dateFormat.format(date);
@@ -86,6 +93,7 @@ public class DBHelper extends SQLiteOpenHelper {
         } finally {
             if (db != null) {
                 db.close();
+                db=null;
             }
         }
     }
@@ -95,6 +103,9 @@ public class DBHelper extends SQLiteOpenHelper {
             category_id = fetchUntitledCategoryId();
         }
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             Date date = Calendar.getInstance().getTime();
             DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
             String currentDate = dateFormat.format(date);
@@ -114,13 +125,17 @@ public class DBHelper extends SQLiteOpenHelper {
         } finally {
             if (db != null) {
                 db.close();
+                db = null;
             }
         }
     }
 
     public void addNoteAudios(List<NotesAudio> audioList) {
-        db.beginTransaction();
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
+            db.beginTransaction();
             ContentValues values = new ContentValues();
             for (NotesAudio audio : audioList) {
                 values.put("AUDIO_PATH", audio.getAudioPath());
@@ -131,13 +146,17 @@ public class DBHelper extends SQLiteOpenHelper {
             db.endTransaction();
             if (db != null) {
                 db.close();
+                db=null;
             }
         }
     }
 
     public void addNoteImages(List<NotesImage> imageList) {
-        db.beginTransaction();
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
+            db.beginTransaction();
             ContentValues values = new ContentValues();
             for (NotesImage image : imageList) {
                 values.put("IMAGE_PATH", image.getImagePath());
@@ -148,13 +167,17 @@ public class DBHelper extends SQLiteOpenHelper {
             db.endTransaction();
             if (db != null) {
                 db.close();
+                db=null;
             }
         }
     }
 
     public void deleteNotes(List<Notes> notes) {
-        db.beginTransaction();
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
+            db.beginTransaction();
             for (Notes deleteNotes : notes) {
                 db.delete("notes", "note_id = ?", new String[]{"" + deleteNotes.getNoteId()});
             }
@@ -163,12 +186,16 @@ public class DBHelper extends SQLiteOpenHelper {
             db.endTransaction();
             if (db != null) {
                 db.close();
+                db=null;
             }
         }
     }
 
     public void updateCategoryName(int categoryId, String newCategoryName, String categoryIcon) {
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             ContentValues values = new ContentValues();
             values.put("CATEGORY_NAME", newCategoryName);
             values.put("CATEGORY_ICON", categoryIcon);
@@ -176,16 +203,21 @@ public class DBHelper extends SQLiteOpenHelper {
         } finally {
             if(db!=null) {
                 db.close();
+                db=null;
             }
         }
     }
 
     public void deleteCategory(int categoryId) {
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             db.delete("category", "category_id = ?", new String[]{"" + categoryId});
         } finally {
             if(db!=null) {
                 db.close();
+                db=null;
             }
         }
     }
@@ -195,6 +227,9 @@ public class DBHelper extends SQLiteOpenHelper {
         String query = "SELECT * FROM CATEGORY";
         Cursor c = null;
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             c = db.rawQuery(query, null);
             if (c.moveToFirst()) {
                 do {
@@ -208,6 +243,11 @@ public class DBHelper extends SQLiteOpenHelper {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if(db!=null) {
+                db.close();
+                db=null;
+            }
         }
         categoryList = fetchNotes(categoryList);
         return categoryList;
@@ -216,6 +256,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public List<Category> fetchNotes(List<Category> categoryList) {
         Cursor c = null;
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             for (int i = 0; i < categoryList.size(); i++) {
                 String query = "SELECT * FROM NOTES WHERE category_id = ? AND IS_DELETED = ?";
                 c = db.rawQuery(query, new String[]{"" + categoryList.get(i).getCategoryId(),"N"});
@@ -251,6 +294,7 @@ public class DBHelper extends SQLiteOpenHelper {
             }
             if (db != null) {
                 db.close();
+                db=null;
             }
         }
         return categoryList;
@@ -261,6 +305,9 @@ public class DBHelper extends SQLiteOpenHelper {
         String query = "SELECT CATEGORY_ID FROM CATEGORY WHERE CATEGORY_NAME = ?";
         Cursor c = null;
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             c = db.rawQuery(query, new String[]{"untitled"});
             if (c.moveToFirst()) {
                 do {
@@ -273,6 +320,10 @@ public class DBHelper extends SQLiteOpenHelper {
             if (c != null) {
                 c.close();
             }
+            if(db!=null) {
+                db.close();
+                db=null;
+            }
         }
         if(categoryId == -1) {
             categoryId = createAndFetchUntitledCategoryId();
@@ -280,21 +331,39 @@ public class DBHelper extends SQLiteOpenHelper {
         return categoryId;
     }
     public int createAndFetchUntitledCategoryId() {
-        ContentValues values = new ContentValues();
-        values.put("CATEGORY_NAME","untitled");
-        values.put("CATEGORY_ICON","default_category");
-        db.insert("CATEGORY",null,values);
+        try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
+            ContentValues values = new ContentValues();
+            values.put("CATEGORY_NAME", "untitled");
+            values.put("CATEGORY_ICON", "default_category");
+            db.insert("CATEGORY", null, values);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(db!=null) {
+                db.close();
+                db = null;
+            }
+        }
 
         return fetchUntitledCategoryId();
     }
 
     public boolean deleteRecoverNote(int noteId,String value) {
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             ContentValues values = new ContentValues();
             values.put("IS_DELETED", value);
             return db.update("notes", values, "NOTE_ID=" + noteId, null) > 0 ? true : false;
         } finally {
-
+            if(db!=null) {
+                db.close();
+                db=null;
+            }
         }
     }
 
@@ -303,6 +372,9 @@ public class DBHelper extends SQLiteOpenHelper {
         String query = "SELECT * FROM NOTES WHERE IS_PINNED = ? AND IS_DELETED = ?";
         Cursor c = null;
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             c = db.rawQuery(query, new String[]{"Y","N"});
             if (c.moveToFirst()) {
                 do {
@@ -332,6 +404,7 @@ public class DBHelper extends SQLiteOpenHelper {
             }
             if(db!=null) {
                 db.close();
+                db=null;
             }
         }
         return pinnedNotesList;
@@ -342,6 +415,9 @@ public class DBHelper extends SQLiteOpenHelper {
         String query = "SELECT * FROM NOTES WHERE IS_DELETED = ?";
         Cursor c = null;
         try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
             c = db.rawQuery(query, new String[]{"Y"});
             if (c.moveToFirst()) {
                 do {
@@ -371,15 +447,29 @@ public class DBHelper extends SQLiteOpenHelper {
             }
             if(db!=null) {
                 db.close();
+                db=null;
             }
         }
         return deletedNotesList;
     }
 
     public boolean moveNotes(int noteId,int destinationCategoryId) {
-        ContentValues values = new ContentValues();
-        values.put("CATEGORY_ID",destinationCategoryId);
-        return db.update("NOTES",values,"NOTE_ID = ?",new String[]{""+noteId})>0?true:false;
+        try {
+            if(db == null) {
+                db = this.getWritableDatabase();
+            }
+            ContentValues values = new ContentValues();
+            values.put("CATEGORY_ID", destinationCategoryId);
+            return db.update("NOTES", values, "NOTE_ID = ?", new String[]{"" + noteId}) > 0 ? true : false;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(db!=null) {
+                db.close();
+                db=null;
+            }
+        }
+        return false;
     }
 
 }

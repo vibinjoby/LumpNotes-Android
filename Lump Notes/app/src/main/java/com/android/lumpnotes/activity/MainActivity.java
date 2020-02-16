@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
         //Pinned notes data population
         dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, true, false);
         if (!dayWiseList.isEmpty()) {
-            todaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+            todaysAdapter = new PinnedNotesRVAdapter(dayWiseList, this);
             todaysAdapter.setPinnedNotesList(dayWiseList);
             todayRV.setAdapter(todaysAdapter);
         } else {
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
 
         dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, true);
         if (!dayWiseList.isEmpty()) {
-            yesterdaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+            yesterdaysAdapter = new PinnedNotesRVAdapter(dayWiseList, this);
             yesterdayRV.setAdapter(yesterdaysAdapter);
         } else {
             yesterdayRV.setVisibility(View.GONE);
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
 
         dayWiseList = AppUtils.getPinnedNotesByDay(pinnedNotesList, false, false);
         if (!dayWiseList.isEmpty()) {
-            oldAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+            oldAdapter = new PinnedNotesRVAdapter(dayWiseList, this);
             oldRV.setAdapter(oldAdapter);
         } else {
             oldRV.setVisibility(View.GONE);
@@ -158,19 +158,19 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
         categoryRV.setHasFixedSize(false);
         notesRv.setHasFixedSize(false);
 
-        categoryRVAdapter = new CategoryRVAdapter(categoryList, getSupportFragmentManager(),categoryRV);
+        categoryRVAdapter = new CategoryRVAdapter(categoryList, getSupportFragmentManager(), categoryRV);
         categoryRV.setAdapter(categoryRVAdapter);
 
         //Notes Recycler View and setting the values of first category as default to notes
-        if(categoryList != null && !categoryList.isEmpty()) {
-            notesRVAdapter = new NotesRVAdapter(categoryList.get(0).getNotesList(),emptyNotes,this);
+        if (categoryList != null && !categoryList.isEmpty()) {
+            notesRVAdapter = new NotesRVAdapter(categoryList.get(0).getNotesList(), emptyNotes, this);
         } else {
-            notesRVAdapter = new NotesRVAdapter(null,emptyNotes,this);
+            notesRVAdapter = new NotesRVAdapter(null, emptyNotes, this);
         }
         notesRv.setAdapter(notesRVAdapter);
         //Set the notes adapter obj to category RV adapter for on click event to update
         categoryRVAdapter.setNotesAdapterobj(notesRVAdapter);
-        SwipeHelper swipeHelper = new SwipeHelper(this, notesRv,60,60) {
+        SwipeHelper swipeHelper = new SwipeHelper(this, notesRv, 60, 60) {
             @Override
             public void instantiateUnderlayButton(final RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
                 underlayButtons.add(new SwipeHelper.UnderlayButton(
@@ -180,24 +180,24 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                         new SwipeHelper.UnderlayButtonClickListener() {
                             @Override
                             public void onClick(int pos) {
-                            if(viewHolder instanceof NotesRVAdapter.NotesRV_VH) {
-                                int selectedCategory = categoryRVAdapter.selectedCategory;
-                                if(selectedCategory!=-1) {
-                                    try {
-                                        Notes noteObj = categoryList.get(selectedCategory - 1).getNotesList().get(viewHolder.getAdapterPosition());
-                                        boolean isDeleted = new DBHelper(context).deleteRecoverNote(noteObj.getNoteId(),"Y");
-                                        if (isDeleted) {
-                                            AppUtils.showToastMessage(context,"Note Deleted successfully",true);
-                                            categoryList.get(selectedCategory - 1).getNotesList().remove(noteObj);
-                                            categoryRVAdapter.setItems(categoryList);
-                                            notesRVAdapter.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
-                                            notesRVAdapter.notifyDataSetChanged();
+                                if (viewHolder instanceof NotesRVAdapter.NotesRV_VH) {
+                                    int selectedCategory = categoryRVAdapter.selectedCategory;
+                                    if (selectedCategory != -1) {
+                                        try {
+                                            Notes noteObj = categoryList.get(selectedCategory - 1).getNotesList().get(viewHolder.getAdapterPosition());
+                                            boolean isDeleted = new DBHelper(context).deleteRecoverNote(noteObj.getNoteId(), "Y");
+                                            if (isDeleted) {
+                                                AppUtils.showToastMessage(context, "Note Deleted successfully", true);
+                                                categoryList.get(selectedCategory - 1).getNotesList().remove(noteObj);
+                                                categoryRVAdapter.setItems(categoryList);
+                                                notesRVAdapter.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
+                                                notesRVAdapter.notifyDataSetChanged();
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
                                         }
-                                    } catch(Exception e) {
-                                        e.printStackTrace();
                                     }
                                 }
-                            }
                             }
                         }
                 ));
@@ -209,9 +209,9 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                         new SwipeHelper.UnderlayButtonClickListener() {
                             @Override
                             public void onClick(int pos) {
-                                if(viewHolder instanceof NotesRVAdapter.NotesRV_VH) {
+                                if (viewHolder instanceof NotesRVAdapter.NotesRV_VH) {
                                     int selectedCategory = categoryRVAdapter.selectedCategory;
-                                    if(selectedCategory!=-1) {
+                                    if (selectedCategory != -1) {
                                         try {
                                             movableNotesObj = categoryList.get(selectedCategory - 1).getNotesList().get(viewHolder.getAdapterPosition());
                                             ChooseCategoryDialogFrag dialogFrag = new ChooseCategoryDialogFrag(categoryList, categoryRVAdapter, listener);
@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(getSupportFragmentManager(),categoryRVAdapter,categoryList);
+                BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(getSupportFragmentManager(), categoryRVAdapter, categoryList);
                 bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
             }
         });
@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                             categoryRVAdapter.setItems(categoryList);
                             //If there is any change in the delete/pinned data in the notes should be updated
                             try {
-                                if(categoryRVAdapter.selectedCategory != -1) {
+                                if (categoryRVAdapter.selectedCategory != -1) {
                                     notesRVAdapter.setNotesList(categoryList.get(categoryRVAdapter.selectedCategory - 1).getNotesList());
                                 }
                             } catch (Exception e) {
@@ -301,8 +301,8 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                 isEmptyPinnedLayout = false;
                 todayRV.setVisibility(View.VISIBLE);
                 todayTxt.setVisibility(View.VISIBLE);
-                if(todaysAdapter == null) {
-                    todaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+                if (todaysAdapter == null) {
+                    todaysAdapter = new PinnedNotesRVAdapter(dayWiseList, this);
                     todayRV.setAdapter(todaysAdapter);
                 }
                 todaysAdapter.setPinnedNotesList(dayWiseList);
@@ -316,8 +316,8 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                 isEmptyPinnedLayout = false;
                 yesterdayRV.setVisibility(View.VISIBLE);
                 yesterdayTxt.setVisibility(View.VISIBLE);
-                if(yesterdaysAdapter == null) {
-                    yesterdaysAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+                if (yesterdaysAdapter == null) {
+                    yesterdaysAdapter = new PinnedNotesRVAdapter(dayWiseList, this);
                     yesterdayRV.setAdapter(yesterdaysAdapter);
                 }
                 yesterdaysAdapter.setPinnedNotesList(dayWiseList);
@@ -331,8 +331,8 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                 isEmptyPinnedLayout = false;
                 oldRV.setVisibility(View.VISIBLE);
                 oldTxt.setVisibility(View.VISIBLE);
-                if(oldAdapter == null) {
-                    oldAdapter = new PinnedNotesRVAdapter(dayWiseList,this);
+                if (oldAdapter == null) {
+                    oldAdapter = new PinnedNotesRVAdapter(dayWiseList, this);
                     oldRV.setAdapter(oldAdapter);
                 }
                 oldAdapter.setPinnedNotesList(dayWiseList);
@@ -340,12 +340,12 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                 oldRV.setVisibility(View.GONE);
                 oldTxt.setVisibility(View.GONE);
             }
-            if(isEmptyPinnedLayout) {
+            if (isEmptyPinnedLayout) {
                 findViewById(R.id.default_pinned_layout).setVisibility(View.VISIBLE);
             } else {
                 findViewById(R.id.default_pinned_layout).setVisibility(View.GONE);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -354,14 +354,14 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
     private void showTrashMenuItems() {
         List<Notes> deletedNotes = new DBHelper(this).fetchDeletedNotes();
         View emptyDeleteView = findViewById(R.id.default_trash);
-        if(deletedNotes!=null && !deletedNotes.isEmpty()) {
+        if (deletedNotes != null && !deletedNotes.isEmpty()) {
             emptyDeleteView.setVisibility(View.GONE);
         } else {
             emptyDeleteView.setVisibility(View.VISIBLE);
         }
-        TrashNotesRVAdapter adapter = new TrashNotesRVAdapter(deletedNotes,categoryList,emptyDeleteView,this);
+        TrashNotesRVAdapter adapter = new TrashNotesRVAdapter(deletedNotes, categoryList, emptyDeleteView, this);
         RecyclerView deleteNotesRV = findViewById(R.id.delete_notes_rv);
-        RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2,1);
+        RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, 1);
         deleteNotesRV.setLayoutManager(layoutManager);
         deleteNotesRV.setAdapter(adapter);
     }
@@ -374,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                 categoryList = new DBHelper(this).fetchAllCategories();
                 categoryRVAdapter.setItems(categoryList);
                 if (data != null && data.getExtras() != null && data.getExtras().get("category_id") != null) {
-                    if(data.getExtras().get("fromPinnedNotes")!=null) {
+                    if (data.getExtras().get("fromPinnedNotes") != null) {
                         showPinnedNotes();
                     }
                     int selectedCategoryId = data.getExtras().getInt("category_id");
@@ -410,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
             if (movableNotesObj != null) {
                 categoryList = new DBHelper(this).fetchAllCategories();
                 boolean isUpdated = new DBHelper(this).moveNotes(movableNotesObj.getNoteId(), categoryList.get(selectedCategoryId).getCategoryId());
-                if(isUpdated) {
+                if (isUpdated) {
                     categoryList = new DBHelper(this).fetchAllCategories();
                     categoryRVAdapter.setItems(categoryList);
                     categoryRVAdapter.selectedCategory = selectedCategoryId + 1;
@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                     notesRVAdapter.setNotesList(categoryList.get(selectedCategoryId).getNotesList());
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
