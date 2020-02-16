@@ -390,6 +390,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
     public void onCategorySelection(int selectedCategoryId) {
         try {
             if (movableNotesObj != null) {
+                categoryList = new DBHelper(this).fetchAllCategories();
                 boolean isUpdated = new DBHelper(this).moveNotes(movableNotesObj.getNoteId(), categoryList.get(selectedCategoryId).getCategoryId());
                 if(isUpdated) {
                     categoryList = new DBHelper(this).fetchAllCategories();

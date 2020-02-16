@@ -76,9 +76,6 @@ public class ChooseCategoryRVAdapter extends RecyclerView.Adapter<ChooseCategory
 
     @Override
     public int getItemCount() {
-        if(ignoreCategoryPos == -1) {
-            return categoryList.size();
-        }
-        return  categoryList.size()-1;
+        return  categoryList.size();
     }
 }

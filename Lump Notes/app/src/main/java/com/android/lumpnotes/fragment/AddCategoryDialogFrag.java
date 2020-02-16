@@ -103,16 +103,11 @@ public class AddCategoryDialogFrag extends DialogFragment implements TextWatcher
                         if(adapter!=null) {
                             adapter.notifyChangeForInsert(categoryList);
                         }
-                        new Handler().post(new Runnable() {
-                            @Override
-                            public void run() {
-                                DBHelper dbHelper = new DBHelper(contextObj);
-                                categoryList = dbHelper.saveAndFetchCategories(addCategoryText.getText().toString(), selectedCategoryIcon);
-                                if(listener!=null) {
-                                    listener.onNewCategoryCreation(categoryList);
-                                }
-                            }
-                        });
+                        DBHelper dbHelper = new DBHelper(contextObj);
+                        categoryList = dbHelper.saveAndFetchCategories(addCategoryText.getText().toString(), selectedCategoryIcon);
+                        if(listener!=null) {
+                            listener.onNewCategoryCreation(categoryList);
+                        }
                     }
                 } else {
                     if(selectedCategoryIcon == null) {
