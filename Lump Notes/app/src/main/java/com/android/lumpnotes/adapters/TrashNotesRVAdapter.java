@@ -174,7 +174,7 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 dbHelper.moveNotes(deletedNoteId,deletedCategoryId);
             }
             deleteNotes.remove(deleteNotes.get(position));
-            notifyDataSetChanged();
+            notifyItemRemoved(position);
             //Update it in the database
             if(dbHelper == null) {
                 dbHelper = new DBHelper(context);
