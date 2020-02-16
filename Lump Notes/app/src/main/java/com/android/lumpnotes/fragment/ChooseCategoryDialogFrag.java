@@ -70,6 +70,7 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
         LinearLayoutManager layoutManager = new LinearLayoutManager(this.getContext());
         chooseCategoryRv.setLayoutManager(layoutManager);
         ChooseCategoryRVAdapter adapter = new ChooseCategoryRVAdapter(categoryList,getResources(),this);
+        adapter.ignoreCategoryPos = this.ignoreCategoryPos;
         chooseCategoryRv.setAdapter(adapter);
 
         //Close the popup in click of X button
