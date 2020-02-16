@@ -27,7 +27,7 @@
         android:layout_marginTop="10dp"
         android:fontFamily="@font/muli_bold"
         android:layout_marginLeft="20dp"
-        android:text="Mathematics"
+        android:text=""
         android:textColor="#000000"
         android:textSize="18dp"
         app:layout_constraintLeft_toRightOf="@id/choose_category_ic"

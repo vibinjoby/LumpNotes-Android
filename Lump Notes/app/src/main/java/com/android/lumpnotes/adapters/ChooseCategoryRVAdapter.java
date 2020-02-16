@@ -67,6 +67,10 @@ public class ChooseCategoryRVAdapter extends RecyclerView.Adapter<ChooseCategory
             } else {
                 holder.numberOfNotes.setText(0 + " Notes");
             }
+        } else {
+            holder.categoryTitle.setVisibility(View.GONE);
+            holder.categoryIcon.setVisibility(View.GONE);
+            holder.numberOfNotes.setVisibility(View.GONE);
         }
     }
 
