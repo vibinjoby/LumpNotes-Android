@@ -279,7 +279,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return categoryId;
     }
-    private int createAndFetchUntitledCategoryId() {
+    public int createAndFetchUntitledCategoryId() {
         ContentValues values = new ContentValues();
         values.put("CATEGORY_NAME","untitled");
         values.put("CATEGORY_ICON","default_category");
@@ -294,9 +294,7 @@ public class DBHelper extends SQLiteOpenHelper {
             values.put("IS_DELETED", value);
             return db.update("notes", values, "NOTE_ID=" + noteId, null) > 0 ? true : false;
         } finally {
-            if(db!=null) {
-                db.close();
-            }
+
         }
     }
 

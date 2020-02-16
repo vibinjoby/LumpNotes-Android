@@ -14,6 +14,7 @@ import com.android.lumpnotes.R;
 import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
+import com.android.lumpnotes.utils.AppUtils;
 
 import java.util.Iterator;
 import java.util.List;
@@ -117,24 +118,70 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     private void onRecoverClickAction(int position) {
+        boolean isCategoryStillAvailable = false;
+        boolean isUntitledCategoryPresent = false;
+        DBHelper dbHelper = null;
         try {
             //update the is deleted to N
             deleteNotes.get(position).setDeleted("N");
             int deletedCategoryId = deleteNotes.get(position).getCategoryId();
             int deletedNoteId = deleteNotes.get(position).getNoteId();
-            Iterator<Category> iterator = categoryList.iterator();
+            String recoveredCategoryName = null;
 
-            while (iterator.hasNext()) {
-                Category category = iterator.next();
-
-                if (category.getCategoryId() == deletedCategoryId) {
-                    category.getNotesList().add(deleteNotes.get(position));
+            //Check if the category of the deleted note is still available
+            for(Category category:categoryList) {
+                if(category.getCategoryId() == deletedCategoryId) {
+                    recoveredCategoryName = category.getCategoryName();
+                    isCategoryStillAvailable = true;
+                    break;
                 }
+            }
+            //If the category is still available add the notes to the list
+            if(isCategoryStillAvailable) {
+                Iterator<Category> iterator = categoryList.iterator();
+
+                while (iterator.hasNext()) {
+                    Category category = iterator.next();
+
+                    if (category.getCategoryId() == deletedCategoryId) {
+                        category.getNotesList().add(deleteNotes.get(position));
+                        break;
+                    }
+                }
+            } else {
+                //Step-1 check if the untitled category is present
+                recoveredCategoryName = "untitled";
+                Iterator<Category> iterator = categoryList.iterator();
+
+                while (iterator.hasNext()) {
+                    Category ctgry = iterator.next();
+
+                    if ("untitled".equalsIgnoreCase(ctgry.getCategoryName())) {
+                        ctgry.getNotesList().add(deleteNotes.get(position));
+                        isUntitledCategoryPresent = true;
+                        deletedCategoryId = ctgry.getCategoryId();
+                        break;
+                    }
+                }
+                //Step-2 If the untitled category is not present we need to create one
+                if(!isUntitledCategoryPresent) {
+                    deletedCategoryId = new DBHelper(context).createAndFetchUntitledCategoryId();
+                }
+                //Now move the note to untitled category
+                if(dbHelper == null) {
+                    dbHelper = new DBHelper(context);
+                }
+                dbHelper.moveNotes(deletedNoteId,deletedCategoryId);
             }
             deleteNotes.remove(deleteNotes.get(position));
             notifyDataSetChanged();
             //Update it in the database
-            new DBHelper(context).deleteRecoverNote(deletedNoteId,"N");
+            if(dbHelper == null) {
+                dbHelper = new DBHelper(context);
+            }
+            dbHelper.deleteRecoverNote(deletedNoteId,"N");
+            categoryList = dbHelper.fetchAllCategories();
+            AppUtils.showToastMessage(context,"Note moved to "+recoveredCategoryName+" Category",true);
         } catch (Exception e) {
             e.printStackTrace();
         }
