@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
     private NotesRVAdapter notesRVAdapter;
 
     private RecyclerView notesRv;
-    private Button addButton;
+    private Button addButton,sortButton;
     private View emptyNotesView;
     private EditText searchTxt;
     private Button searchIcon;
@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
         //Initializing the elements from the view
         categoryRV = findViewById(R.id.category_rv);
         addButton = findViewById(R.id.addBtn);
+        sortButton = findViewById(R.id.sort_notes_btn);
         emptyNotesView = findViewById(R.id.default_note);
         searchTxt = findViewById(R.id.notes_search_txt);
         searchIcon = findViewById(R.id.notes_searchbtn);

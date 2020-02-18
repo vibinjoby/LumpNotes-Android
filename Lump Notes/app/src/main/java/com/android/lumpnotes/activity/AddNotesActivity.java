@@ -186,7 +186,8 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     public void onBackPressed() {
         if (isEditNote) {
             if (!notes.getNoteTitle().equalsIgnoreCase(notesTitle.getText().toString()) ||
-                    (hybridList.size() != notes.getHybridList().size())
+                    (hybridList.size() != notes.getHybridList().size()) ||
+                            isPinned != (notes.isPinned().equalsIgnoreCase("Y")?true:false)
             ) {
                 new AlertDialog.Builder(this)
                         .setTitle("Unsaved Changes")

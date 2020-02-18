@@ -91,6 +91,7 @@
             android:layout_height="wrap_content">
 
             <Button
+                android:id="@+id/sort_notes_btn"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_alignParentRight="true"
