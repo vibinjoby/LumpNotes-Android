@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
@@ -23,6 +24,7 @@ import com.android.lumpnotes.listeners.DialogFragmentActivityListener;
 import com.android.lumpnotes.listeners.RecyclerViewClickListener;
 import com.android.lumpnotes.models.Category;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWatcher, RecyclerViewClickListener {
@@ -31,6 +33,8 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
     private int selectedCategoryPos;
     public int ignoreCategoryPos = -1;
     private DialogFragmentActivityListener listener;
+    private EditText searchBar;
+    ChooseCategoryRVAdapter adapter;
     public ChooseCategoryDialogFrag(List<Category> categoryList,CategoryRVAdapter categoryRVAdapter,DialogFragmentActivityListener listener) {
         this.categoryList = categoryList;
         this.categoryRVAdapter = categoryRVAdapter;
@@ -52,8 +56,8 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
             getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
         View emptyCategoryView = view.findViewById(R.id.default_choose_category_layout);
-        TextView textView = view.findViewById(R.id.dialog_search_bar);
-        textView.addTextChangedListener(this);
+        searchBar = view.findViewById(R.id.dialog_search_bar);
+        searchBar.addTextChangedListener(this);
         Button addCategoryBtn = view.findViewById(R.id.add_category_ch_btn);
         if(ignoreCategoryPos == -1) {
             addCategoryBtn.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +74,7 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
         RecyclerView chooseCategoryRv = view.findViewById(R.id.choose_category_rv);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this.getContext());
         chooseCategoryRv.setLayoutManager(layoutManager);
-        ChooseCategoryRVAdapter adapter = new ChooseCategoryRVAdapter(categoryList,getResources(),this);
+        adapter = new ChooseCategoryRVAdapter(categoryList,getResources(),this);
         adapter.ignoreCategoryPos = this.ignoreCategoryPos;
         chooseCategoryRv.setAdapter(adapter);
 
@@ -94,7 +98,7 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+        searchCategory(searchBar.getText().toString());
     }
 
     @Override
@@ -107,5 +111,32 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
         selectedCategoryPos = position;
         listener.onCategorySelection(selectedCategoryPos);
         dismiss();
+    }
+    private void searchCategory(String searchTxt) {
+        if(categoryList!=null && !categoryList.isEmpty()) {
+            List<Category> filteredCategories = new ArrayList<>();
+            List<Category> tempCategoryList = new ArrayList<>();
+            tempCategoryList.addAll(categoryList);
+            if (searchTxt != null && !searchTxt.isEmpty()) {
+                for (Category category : tempCategoryList) {
+                    if(ignoreCategoryPos == -1) {
+                        if (category.getCategoryName().contains(searchTxt)) {
+                            filteredCategories.add(category);
+                        }
+                    } else {
+                        if(category.getCategoryName().equalsIgnoreCase(categoryList.get(ignoreCategoryPos).getCategoryName())) {
+                            continue;
+                        } else if (category.getCategoryName().contains(searchTxt)) {
+                            filteredCategories.add(category);
+                        }
+                    }
+                }
+                adapter.ignoreCategoryPos = -1;
+                adapter.setCategoryList(filteredCategories);
+            } else {
+                adapter.ignoreCategoryPos = this.ignoreCategoryPos;
+                adapter.setCategoryList(categoryList);
+            }
+        }
     }
 }

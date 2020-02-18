@@ -57,6 +57,9 @@ public class ChooseCategoryRVAdapter extends RecyclerView.Adapter<ChooseCategory
     @Override
     public void onBindViewHolder(@NonNull ChooseCategoryRVAdapter.ChooseCategoryVH holder, int position) {
         if(ignoreCategoryPos != position) {
+            holder.categoryTitle.setVisibility(View.VISIBLE);
+            holder.categoryIcon.setVisibility(View.VISIBLE);
+            holder.numberOfNotes.setVisibility(View.VISIBLE);
             holder.categoryTitle.setText(categoryList.get(position).getCategoryName());
             String uri = "com.android.lumpnotes:drawable/" + categoryList.get(position).getCategoryIcon();
             int res = resourcesObj.getIdentifier(uri, null, null);
@@ -77,5 +80,9 @@ public class ChooseCategoryRVAdapter extends RecyclerView.Adapter<ChooseCategory
     @Override
     public int getItemCount() {
         return  categoryList.size();
+    }
+    public void setCategoryList(List<Category> categoryList) {
+        this.categoryList = categoryList;
+        notifyDataSetChanged();
     }
 }
