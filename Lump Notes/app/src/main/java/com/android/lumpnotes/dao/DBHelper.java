@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.location.Address;
+import android.location.Geocoder;
 
 import androidx.annotation.Nullable;
 
@@ -16,7 +18,9 @@ import com.android.lumpnotes.utils.AppUtils;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 
+import java.io.IOException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,10 +31,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "LumpNotes.db";
     SQLiteDatabase db;
+    private Context context;
 
     public DBHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, 1);
         db = this.getWritableDatabase();
+        this.context = context;
     }
 
     @Override
@@ -43,7 +49,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("create table notes (NOTE_ID INTEGER PRIMARY KEY AUTOINCREMENT, CATEGORY_ID INTEGER, NOTE_TITLE TEXT, " +
                 "NOTE_AUDIO_ID INTEGER, NOTE_IMAGE_ID INTEGER, NOTE_DESCRIPTION TEXT, NOTE_CREATED_TIMESTAMP DATE," +
                 "NOTE_EDITED_DATE DATE, NOTE_DELETED_DATE DATE, NOTE_PINNED_DATE DATE," +
-                "NOTE_LATITUDE_LOC TEXT, NOTE_LONGITUDE_LOC TEXT, IS_PINNED TEXT,IS_DELETED TEXT,HYBRID_LIST_OBJ TEXT," +
+                "NOTE_LATITUDE_LOC TEXT, NOTE_LONGITUDE_LOC TEXT, IS_PINNED TEXT,IS_DELETED TEXT,HYBRID_LIST_OBJ TEXT,ADDRESS TEXT," +
                 "CONSTRAINT fk_category FOREIGN KEY (CATEGORY_ID) REFERENCES category(CATEGORY_ID))");
     }
 
@@ -105,10 +111,29 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public boolean saveNotes(int category_id, String title, boolean isPinned,String latitude_loc, String longitude_loc,
     String jsonObj) {
+        String address = null;
+        double latitude = 0,longitude = 0;
+        try {
+            latitude = Double.parseDouble(latitude_loc);
+            longitude = Double.parseDouble(longitude_loc);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (category_id == -1) {
             category_id = fetchUntitledCategoryId();
         }
         try {
+            Geocoder geocoder = new Geocoder(context);
+            List<Address> addresses = null;
+            if(latitude != 0 && longitude!=0) {
+                try {
+                    addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                    address = addresses.get(0).getAddressLine(0);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             if(db == null) {
                 db = this.getWritableDatabase();
             }
@@ -122,6 +147,9 @@ public class DBHelper extends SQLiteOpenHelper {
             values.put("NOTE_LONGITUDE_LOC", longitude_loc);
             values.put("NOTE_CREATED_TIMESTAMP",currentDate);
             values.put("IS_PINNED",isPinned?"Y":"N");
+            if(address!=null) {
+                values.put("ADDRESS", address);
+            }
             if(isPinned) {
                 values.put("NOTE_PINNED_DATE",currentDate);
             }
@@ -132,48 +160,6 @@ public class DBHelper extends SQLiteOpenHelper {
             if (db != null) {
                 db.close();
                 db = null;
-            }
-        }
-    }
-
-    public void addNoteAudios(List<NotesAudio> audioList) {
-        try {
-            if(db == null) {
-                db = this.getWritableDatabase();
-            }
-            db.beginTransaction();
-            ContentValues values = new ContentValues();
-            for (NotesAudio audio : audioList) {
-                values.put("AUDIO_PATH", audio.getAudioPath());
-                db.insert("note_audios", null, values);
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-            if (db != null) {
-                db.close();
-                db=null;
-            }
-        }
-    }
-
-    public void addNoteImages(List<NotesImage> imageList) {
-        try {
-            if(db == null) {
-                db = this.getWritableDatabase();
-            }
-            db.beginTransaction();
-            ContentValues values = new ContentValues();
-            for (NotesImage image : imageList) {
-                values.put("IMAGE_PATH", image.getImagePath());
-                db.insert("note_images", null, values);
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-            if (db != null) {
-                db.close();
-                db=null;
             }
         }
     }
@@ -296,6 +282,7 @@ public class DBHelper extends SQLiteOpenHelper {
                                 notes.setHybridList(hybridList);
                             }
                         }
+                        notes.setAddress(c.getString(15));
                         if (categoryList.get(i).getNotesList() == null) {
                             categoryList.get(i).setNotesList(new ArrayList<Notes>());
                         }
@@ -420,6 +407,7 @@ public class DBHelper extends SQLiteOpenHelper {
                             notes.setHybridList(hybridList);
                         }
                     }
+                    notes.setAddress(c.getString(15));
 
                     pinnedNotesList.add(notes);
                 } while (c.moveToNext());
@@ -474,6 +462,7 @@ public class DBHelper extends SQLiteOpenHelper {
                             notes.setHybridList(hybridList);
                         }
                     }
+                    notes.setAddress(c.getString(15));
 
                     deletedNotesList.add(notes);
                 } while (c.moveToNext());

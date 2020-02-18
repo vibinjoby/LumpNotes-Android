@@ -56,7 +56,12 @@ public class PinnedNotesRVAdapter extends RecyclerView.Adapter<PinnedNotesRVAdap
     @Override
     public void onBindViewHolder(@NonNull PinnedViewHolder holder, final int position) {
         if(!isTestData) {
-            //holder.locationTxt.setText(pinnedNotes.get(position).getAddress());
+            if(pinnedNotes.get(position).getAddress()!=null &&
+                    !pinnedNotes.get(position).getAddress().isEmpty()) {
+                holder.locationTxt.setText(pinnedNotes.get(position).getAddress());
+            } else {
+                holder.locationTxt.setText("Location not tracked");
+            }
             holder.notesTitle.setText(pinnedNotes.get(position).getNoteTitle());
             try {
                 String lastEditedTimeStamp = null;
