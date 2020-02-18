@@ -2,6 +2,7 @@ package com.android.lumpnotes.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -393,18 +395,44 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
 
 
     private void showTrashMenuItems() {
-        List<Notes> deletedNotes = new DBHelper(this).fetchDeletedNotes();
+        final List<Notes> deletedNotes = new DBHelper(this).fetchDeletedNotes();
         View emptyDeleteView = findViewById(R.id.default_trash);
+        TextView clearAllTv = findViewById(R.id.clear_all_tv);
         if (deletedNotes != null && !deletedNotes.isEmpty()) {
             emptyDeleteView.setVisibility(View.GONE);
         } else {
             emptyDeleteView.setVisibility(View.VISIBLE);
         }
-        TrashNotesRVAdapter adapter = new TrashNotesRVAdapter(deletedNotes, categoryList, emptyDeleteView, this);
+        final TrashNotesRVAdapter adapter = new TrashNotesRVAdapter(deletedNotes, categoryList, emptyDeleteView, this);
         RecyclerView deleteNotesRV = findViewById(R.id.delete_notes_rv);
         RecyclerView.LayoutManager layoutManager = new StaggeredGridLayoutManager(2, 1);
         deleteNotesRV.setLayoutManager(layoutManager);
         deleteNotesRV.setAdapter(adapter);
+
+        clearAllTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(deletedNotes!=null && !deletedNotes.isEmpty()) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.MyDialogTheme);
+                    builder.setTitle("Are you sure you want to permanently delete all the notes ?");
+                    builder.setMessage("This will be deleted immediately.You can’t undo this action.")
+                            .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.dismiss();
+                                    new DBHelper(MainActivity.this).deleteNotes(deletedNotes);
+                                    adapter.setDeleteNotes(null);
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                    builder.create();
+                    builder.show();
+                }
+            }
+        });
     }
 
     @Override

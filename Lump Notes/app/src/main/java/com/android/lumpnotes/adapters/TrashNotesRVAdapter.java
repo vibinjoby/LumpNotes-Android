@@ -192,4 +192,9 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             e.printStackTrace();
         }
     }
+
+    public void setDeleteNotes(List<Notes> deleteNotes) {
+        this.deleteNotes = deleteNotes;
+        notifyDataSetChanged();
+    }
 }
