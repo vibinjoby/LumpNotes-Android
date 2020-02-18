@@ -75,11 +75,15 @@ public class PinnedNotesRVAdapter extends RecyclerView.Adapter<PinnedNotesRVAdap
                 @Override
                 public void onClick(View v) {
                     if(pinnedNotes!=null) {
-                        Intent i=new Intent(activity.getApplicationContext(), AddNotesActivity.class);
-                        String selectedNote = new Gson().toJson(pinnedNotes.get(position));
-                        i.putExtra("selectedNote",selectedNote);
-                        i.putExtra("fromPinnedNotes","Y");
-                        activity.startActivityForResult(i,1);
+                        try {
+                            Intent i = new Intent(activity.getApplicationContext(), AddNotesActivity.class);
+                            String selectedNote = new Gson().toJson(pinnedNotes.get(position));
+                            i.putExtra("selectedNote", selectedNote);
+                            i.putExtra("fromPinnedNotes", "Y");
+                            activity.startActivityForResult(i, 1);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             });

@@ -12,6 +12,9 @@ import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.models.NotesAudio;
 import com.android.lumpnotes.models.NotesImage;
+import com.android.lumpnotes.utils.AppUtils;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -40,7 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("create table notes (NOTE_ID INTEGER PRIMARY KEY AUTOINCREMENT, CATEGORY_ID INTEGER, NOTE_TITLE TEXT, " +
                 "NOTE_AUDIO_ID INTEGER, NOTE_IMAGE_ID INTEGER, NOTE_DESCRIPTION TEXT, NOTE_CREATED_TIMESTAMP DATE," +
                 "NOTE_EDITED_DATE DATE, NOTE_DELETED_DATE DATE, NOTE_PINNED_DATE DATE," +
-                "NOTE_LATITUDE_LOC TEXT, NOTE_LONGITUDE_LOC TEXT, IS_PINNED TEXT,IS_DELETED TEXT," +
+                "NOTE_LATITUDE_LOC TEXT, NOTE_LONGITUDE_LOC TEXT, IS_PINNED TEXT,IS_DELETED TEXT,HYBRID_LIST_OBJ TEXT," +
                 "CONSTRAINT fk_category FOREIGN KEY (CATEGORY_ID) REFERENCES category(CATEGORY_ID))");
     }
 
@@ -71,7 +74,8 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    public boolean editNotes(int noteId, String title, String description, boolean isPinned,String latitude_loc, String longitude_loc) {
+    public boolean editNotes(int noteId, String title, boolean isPinned,String latitude_loc, String longitude_loc,
+            String jsonObj) {
         try {
             if(db == null) {
                 db = this.getWritableDatabase();
@@ -81,7 +85,6 @@ public class DBHelper extends SQLiteOpenHelper {
             String currentDate = dateFormat.format(date);
             ContentValues values = new ContentValues();
             values.put("NOTE_TITLE", title);
-            values.put("NOTE_DESCRIPTION", description);
             values.put("NOTE_LATITUDE_LOC", latitude_loc);
             values.put("NOTE_LONGITUDE_LOC", longitude_loc);
             values.put("NOTE_EDITED_DATE",currentDate);
@@ -90,6 +93,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 values.put("NOTE_PINNED_DATE",currentDate);
             }
             values.put("IS_DELETED","N");
+            values.put("HYBRID_LIST_OBJ",jsonObj);
             return db.update("notes", values, "NOTE_ID="+noteId,null) > 0 ? true : false;
         } finally {
             if (db != null) {
@@ -99,7 +103,8 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    public boolean saveNotes(int category_id, String title, String description, boolean isPinned,String latitude_loc, String longitude_loc) {
+    public boolean saveNotes(int category_id, String title, boolean isPinned,String latitude_loc, String longitude_loc,
+    String jsonObj) {
         if (category_id == -1) {
             category_id = fetchUntitledCategoryId();
         }
@@ -113,7 +118,6 @@ public class DBHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put("CATEGORY_ID", category_id);
             values.put("NOTE_TITLE", title);
-            values.put("NOTE_DESCRIPTION", description);
             values.put("NOTE_LATITUDE_LOC", latitude_loc);
             values.put("NOTE_LONGITUDE_LOC", longitude_loc);
             values.put("NOTE_CREATED_TIMESTAMP",currentDate);
@@ -122,6 +126,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 values.put("NOTE_PINNED_DATE",currentDate);
             }
             values.put("IS_DELETED","N");
+            values.put("HYBRID_LIST_OBJ",jsonObj);
             return db.insert("notes", null, values) > 0 ? true : false;
         } finally {
             if (db != null) {
@@ -281,6 +286,16 @@ public class DBHelper extends SQLiteOpenHelper {
                         notes.setNoteLongitudeLoc(c.getString(11));
                         notes.setPinned(c.getString(12));
                         notes.setDeleted(c.getString(13));
+
+                        //Getting the JSON object from DB and converting it to List
+                        String jsonObj = c.getString(14);
+                        if(jsonObj!=null && !jsonObj.isEmpty()) {
+                            List tempList = new Gson().fromJson(jsonObj, List.class);
+                            List hybridList = AppUtils.fetchDeserializedHybridList(tempList);
+                            if(hybridList!=null && !hybridList.isEmpty()) {
+                                notes.setHybridList(hybridList);
+                            }
+                        }
                         if (categoryList.get(i).getNotesList() == null) {
                             categoryList.get(i).setNotesList(new ArrayList<Notes>());
                         }
@@ -395,6 +410,17 @@ public class DBHelper extends SQLiteOpenHelper {
                     notes.setNoteLongitudeLoc(c.getString(11));
                     notes.setPinned(c.getString(12));
                     notes.setDeleted(c.getString(13));
+
+                    //Getting the JSON object from DB and converting it to List
+                    String jsonObj = c.getString(14);
+                    if(jsonObj!=null && !jsonObj.isEmpty()) {
+                        List tempList = new Gson().fromJson(jsonObj, List.class);
+                        List hybridList = AppUtils.fetchDeserializedHybridList(tempList);
+                        if(hybridList!=null && !hybridList.isEmpty()) {
+                            notes.setHybridList(hybridList);
+                        }
+                    }
+
                     pinnedNotesList.add(notes);
                 } while (c.moveToNext());
             }
@@ -438,6 +464,17 @@ public class DBHelper extends SQLiteOpenHelper {
                     notes.setNoteLongitudeLoc(c.getString(11));
                     notes.setPinned(c.getString(12));
                     notes.setDeleted(c.getString(13));
+
+                    //Getting the JSON object from DB and converting it to List
+                    String jsonObj = c.getString(14);
+                    if(jsonObj!=null && !jsonObj.isEmpty()) {
+                        List tempList = new Gson().fromJson(jsonObj, List.class);
+                        List hybridList = AppUtils.fetchDeserializedHybridList(tempList);
+                        if(hybridList!=null && !hybridList.isEmpty()) {
+                            notes.setHybridList(hybridList);
+                        }
+                    }
+
                     deletedNotesList.add(notes);
                 } while (c.moveToNext());
             }

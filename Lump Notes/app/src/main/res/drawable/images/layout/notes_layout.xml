@@ -25,8 +25,8 @@
 
     <Button
         android:id="@+id/save_button"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:background="@raw/save"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/notes_header"
@@ -77,25 +77,12 @@
         app:layout_constraintTop_toBottomOf="@id/notes_header"
         app:layout_constraintLeft_toLeftOf="parent"/>
 
-    <EditText
-        android:id="@+id/notes_description"
-        android:gravity="top|left"
-        android:paddingLeft="10dp"
-        android:background="#00000000"
-        android:theme="@style/NotesDesciptionTheme"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fontFamily="@font/helvetica_neue_light"
-        android:textSize="18dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:inputType="textEmailAddress|textMultiLine"
         android:layout_marginTop="110dp"
-        android:hint="Note"
-        android:layout_marginBottom="50dp"
-        android:lines="20"
-        android:minLines="5"
-        android:scrollHorizontally="false"
-        android:scrollbars="vertical" />
+        android:layout_marginBottom="50dp"/>
 
 
     <View
@@ -132,6 +119,17 @@
         android:layout_height="25dp"
         android:layout_marginRight="20dp"
         android:background="@raw/microphone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/bottom_footer_view"/>
+
+    <include android:id="@+id/audio_recording_layout"
+        layout="@layout/audio_recording_layout"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:visibility="gone"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@id/bottom_footer_view"/>

@@ -2,6 +2,12 @@ package com.android.lumpnotes.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.media.MediaRecorder;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,16 +15,34 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
+
 import com.android.lumpnotes.R;
+import com.android.lumpnotes.activity.MainActivity;
+import com.android.lumpnotes.adapters.AddNotesRVAdapter;
+import com.android.lumpnotes.fragment.ImageSourceBSFrag;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
+import com.android.lumpnotes.models.NotesAudio;
+import com.android.lumpnotes.models.NotesImage;
+import com.google.gson.internal.LinkedTreeMap;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static com.android.lumpnotes.activity.AddNotesActivity.REQUEST_AUDIO_PERMISSION_CODE;
 
 public class AppUtils {
     public static void showToastMessage(Context context, String message, boolean isSuccessImg) {
@@ -146,5 +170,92 @@ public class AppUtils {
             }
         }
         return categoryIndex;
+    }
+
+    public static boolean CheckPermissions(Context context) {
+        int result = ContextCompat.checkSelfPermission(context, WRITE_EXTERNAL_STORAGE);
+        int result1 = ContextCompat.checkSelfPermission(context, RECORD_AUDIO);
+        return result == PackageManager.PERMISSION_GRANTED && result1 == PackageManager.PERMISSION_GRANTED;
+
+    }
+
+    public static void RequestPermissions(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE}, REQUEST_AUDIO_PERMISSION_CODE);
+    }
+
+    public static File persistImage(Context context,Bitmap bitmap, String name) {
+        File filesDir = context.getFilesDir();
+        File imageFile = new File(filesDir, name + ".jpg");
+
+        OutputStream os;
+        try {
+            os = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            os.flush();
+            os.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return imageFile;
+    }
+
+    public static MediaRecorder startRecording(MediaRecorder mRecorder,Activity activity,Context context,String audioFileName) {
+        if (CheckPermissions(context)) {
+            mRecorder = new MediaRecorder();
+            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            final File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), audioFileName);
+            outputFile.setWritable(true);
+            mRecorder.setOutputFile(outputFile.getAbsolutePath());
+            try {
+                mRecorder.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mRecorder.start();
+            Toast.makeText(context, "Recording Started", Toast.LENGTH_SHORT).show();
+        } else {
+            RequestPermissions(activity);
+        }
+        return mRecorder;
+    }
+
+    public static List fetchDeserializedHybridList(List dataList) {
+        List hybridList = new ArrayList();
+        try {
+            for (Object o : dataList) {
+                if (o instanceof String) {
+                    hybridList.add(o);
+                } else if (o instanceof LinkedTreeMap) {
+                    if (((LinkedTreeMap) o).get("imagePath") != null) {
+                        NotesImage image = new NotesImage();
+                        image.setImageId(0);
+                        image.setImagePath((String) ((LinkedTreeMap) o).get("imagePath"));
+                        hybridList.add(image);
+                    } else if (((LinkedTreeMap) o).get("audioPath") != null) {
+                        NotesAudio audio = new NotesAudio();
+                        audio.setAudioId(0);
+                        audio.setAudioPath((String) ((LinkedTreeMap) o).get("audioPath"));
+                        hybridList.add(audio);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return hybridList;
+    }
+
+    public static boolean compareLists( List<?> l1, List<?> l2 ) {
+        // make a copy of the list so the original list is not changed, and remove() is supported
+        ArrayList<?> cp = new ArrayList<>( l1 );
+        for ( Object o : l2 ) {
+            if ( !cp.remove( o ) ) {
+                return false;
+            }
+        }
+        return cp.isEmpty();
     }
 }

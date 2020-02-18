@@ -20,6 +20,7 @@ public class Notes {
     private String deletedDate;
     private String pinnedDate;
     private String address;
+    private List hybridList;
 
     public int getNoteId() {
         return noteId;
@@ -157,6 +158,31 @@ public class Notes {
         this.imageId = imageId;
     }
 
+
+    public String getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(String isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public String getIsPinned() {
+        return isPinned;
+    }
+
+    public void setIsPinned(String isPinned) {
+        this.isPinned = isPinned;
+    }
+
+    public List getHybridList() {
+        return hybridList;
+    }
+
+    public void setHybridList(List hybridList) {
+        this.hybridList = hybridList;
+    }
+
     @Override
     public String toString() {
         return "Notes{" +
@@ -166,17 +192,18 @@ public class Notes {
                 ", noteDescription='" + noteDescription + '\'' +
                 ", audioId=" + audioId +
                 ", imageId=" + imageId +
-                ", noteCreatedTimeStamp=" + noteCreatedTimeStamp +
-                ", lastEditedTimeStamp=" + lastEditedTimeStamp +
+                ", noteCreatedTimeStamp='" + noteCreatedTimeStamp + '\'' +
+                ", lastEditedTimeStamp='" + lastEditedTimeStamp + '\'' +
                 ", noteLatitudeLoc='" + noteLatitudeLoc + '\'' +
                 ", noteLongitudeLoc='" + noteLongitudeLoc + '\'' +
                 ", audioList=" + audioList +
                 ", imageList=" + imageList +
-                ", isDeleted=" + isDeleted +
-                ", isPinned=" + isPinned +
-                ", deletedDate=" + deletedDate +
-                ", pinnedDate=" + pinnedDate +
+                ", isDeleted='" + isDeleted + '\'' +
+                ", isPinned='" + isPinned + '\'' +
+                ", deletedDate='" + deletedDate + '\'' +
+                ", pinnedDate='" + pinnedDate + '\'' +
                 ", address='" + address + '\'' +
+                ", hybridList=" + hybridList +
                 '}';
     }
 }

@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,12 +31,11 @@ import com.android.lumpnotes.models.EmptyNotes;
 import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.swipes.SwipeHelper;
 import com.android.lumpnotes.dao.DBHelper;
-import com.android.lumpnotes.fragment.BottomSheetFragment;
+import com.android.lumpnotes.fragment.PlusButtonBSFragment;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.utils.AppUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements DialogFragmentActivityListener {
@@ -239,8 +237,8 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(getSupportFragmentManager(), categoryRVAdapter, categoryList);
-                bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+                PlusButtonBSFragment plusButtonBSFragment = new PlusButtonBSFragment(getSupportFragmentManager(), categoryRVAdapter, categoryList);
+                plusButtonBSFragment.show(getSupportFragmentManager(), plusButtonBSFragment.getTag());
             }
         });
 

@@ -1,31 +1,61 @@
 package com.android.lumpnotes.activity;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.lumpnotes.R;
+import com.android.lumpnotes.adapters.AddNotesRVAdapter;
 import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.fragment.ChooseCategoryDialogFrag;
+import com.android.lumpnotes.fragment.ImageSourceBSFrag;
 import com.android.lumpnotes.listeners.DialogFragmentActivityListener;
+import com.android.lumpnotes.listeners.ImageUploadClickListener;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
+import com.android.lumpnotes.models.NotesAudio;
+import com.android.lumpnotes.models.NotesImage;
 import com.android.lumpnotes.utils.AppUtils;
+import com.android.lumpnotes.utils.RealFilePath;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class AddNotesActivity extends AppCompatActivity implements View.OnClickListener, DialogFragmentActivityListener {
+import static android.Manifest.permission.RECORD_AUDIO;
+
+public class AddNotesActivity extends AppCompatActivity implements View.OnClickListener, DialogFragmentActivityListener , ImageUploadClickListener {
 
     Button backBtn;
     Button locationBtn,shareBtn,pinnedBtn, saveButton;
     Button imageUploadBtn, audioBtn;
-    EditText notesTitle,notesDescription;
+    EditText notesTitle;
     int selectedCategoryPos = -1;
     boolean isEditNote = false;
     boolean isInserted = false;
@@ -36,10 +66,29 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
 
     List<Category> categoryList = null;
 
+    int counter = 0;
+    private final int pick_image = 12345;
+    private final int take_image = 6352;
+    private MediaRecorder mRecorder;
+    private static final int REQUEST_CAMERA_ACCESS_PERMISSION = 5674;
+    private Bitmap bitmap;
+    public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
+    private String audioFileName;
+    List hybridList = new ArrayList();
+    AddNotesRVAdapter adapter;
+    RecyclerView addNotesRV;
+    ImageView dotImg;
+    TextView audioRecorderText;
+    int audioTimerCount = 0;
+    Button cancelRecording,saveRecording;
+    Timer timer;
+    ImageUploadClickListener listener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.notes_layout);
+        listener = this;
 
         if(getIntent().getExtras()!=null && getIntent().getExtras().get("fromPinnedNotes")!=null) {
             isFromPinnedPage = true;
@@ -53,6 +102,9 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         if(getIntent().getExtras().getString("selectedNote")!=null) {
             String selectedNote = getIntent().getExtras().getString("selectedNote");
             notes = new Gson().fromJson(selectedNote, Notes.class);
+            if(notes.getHybridList()!=null) {
+                hybridList = AppUtils.fetchDeserializedHybridList(notes.getHybridList());
+            }
         }
 
         if(categoryList!=null ) {
@@ -76,11 +128,9 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         audioBtn = findViewById(R.id.mic_button);
 
         notesTitle = findViewById(R.id.notes_title);
-        notesDescription = findViewById(R.id.notes_description);
 
         if(notes != null) {
             notesTitle.setText(notes.getNoteTitle());
-            notesDescription.setText(notes.getNoteDescription());
             isEditNote = true;
             if(notes.isPinned().equalsIgnoreCase("Y")) {
                 isPinned = true;
@@ -90,16 +140,81 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 findViewById(R.id.bookmark_button).setBackgroundResource(R.drawable.bookmark);
             }
         }
+
+        //Notes content
+        findViewById(R.id.image_upload_button).setOnClickListener(this);
+        findViewById(R.id.mic_button).setOnClickListener(this);
+        dotImg = findViewById(R.id.dot_image);
+        audioRecorderText = findViewById(R.id.audio_timer_txt);
+        addNotesRV = findViewById(R.id.recycler_id);
+        saveRecording = findViewById(R.id.save_rec);
+        cancelRecording = findViewById(R.id.cancel_rec);
+        saveRecording.setOnClickListener(this);
+        cancelRecording.setOnClickListener(this);
+        if(!isEditNote) {
+            hybridList.add("");
+        }
+        adapter = new AddNotesRVAdapter(hybridList);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        addNotesRV.setLayoutManager(layoutManager);
+        addNotesRV.setAdapter(adapter);
     }
 
     @Override
     public void onBackPressed() {
-        if(isNewCategoryCreated) {
-            Intent intent = new Intent();
-            setResult(Activity.RESULT_OK, intent);
-            finish();
+        if(isEditNote) {
+            if(!notes.getNoteTitle().equalsIgnoreCase(notesTitle.getText().toString()) ||
+                    !AppUtils.compareLists(hybridList,AppUtils.fetchDeserializedHybridList(notes.getHybridList()))
+                ) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Unsaved Changes")
+                        .setMessage("Are you sure you want to discard all the changes??")
+
+                        .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(mRecorder!=null) {
+                                    mRecorder.stop();
+                                    mRecorder.release();
+                                    mRecorder = null;
+                                }
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("Save", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                DBHelper dbHelper = new DBHelper(AddNotesActivity.this);
+                                String jsonObj = new Gson().toJson(hybridList);
+                                isInserted = dbHelper.editNotes(notes.getNoteId(),notesTitle.getText().toString(),
+                                        isPinned,"27.2038", "77.5011",jsonObj);
+                                final Intent data = new Intent();
+                                data.putExtra("category_id", selectedCategoryPos);
+                                if(isFromPinnedPage) {
+                                    data.putExtra("fromPinnedNotes","Y");
+                                }
+                                setResult(Activity.RESULT_OK, data);
+                                AppUtils.showToastMessage(AddNotesActivity.this, "Notes edited Successfully", true);
+                                finish();
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            } else {
+                finish();
+            }
         } else {
-            super.onBackPressed();
+            if (isNewCategoryCreated) {
+                Intent intent = new Intent();
+                setResult(Activity.RESULT_OK, intent);
+                if (mRecorder != null) {
+                    mRecorder.stop();
+                    mRecorder.release();
+                    mRecorder = null;
+                }
+                finish();
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 
@@ -124,11 +239,13 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 }
                 //If there is no untitled category created before we need to create a new one
                 if(isEditNote) {
+                    String jsonObj = new Gson().toJson(hybridList);
                     isInserted = dbHelper.editNotes(notes.getNoteId(),notesTitle.getText().toString(),
-                            notesDescription.getText().toString(), isPinned,"27.2038", "77.5011");
+                             isPinned,"27.2038", "77.5011",jsonObj);
                 } else {
+                    String jsonObj = new Gson().toJson(hybridList);
                     isInserted = dbHelper.saveNotes(categoryId, notesTitle.getText().toString(),
-                            notesDescription.getText().toString(), isPinned,"27.2038", "77.5011");
+                             isPinned,"27.2038", "77.5011",jsonObj);
                 }
                 if (isInserted) {
                     final Intent data = new Intent();
@@ -167,6 +284,137 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             }
             isPinned = !isPinned;
         }
+        else if(v.getId()== R.id.image_upload_button) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA},
+                        REQUEST_CAMERA_ACCESS_PERMISSION);
+            } else {
+                showPictureDialog();
+            }
+        }
+        else if(v.getId()== R.id.mic_button) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                    && ActivityCompat.checkSelfPermission(this, RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{RECORD_AUDIO},
+                        REQUEST_AUDIO_PERMISSION_CODE);
+            } else {
+                findViewById(R.id.audio_recording_layout).setVisibility(View.VISIBLE);
+                findViewById(R.id.mic_button).setVisibility(View.GONE);
+                final Animation fadeIn = new AlphaAnimation(0, 1);
+                fadeIn.setInterpolator(new DecelerateInterpolator());
+                fadeIn.setDuration(1000);
+                fadeIn.setRepeatMode(Animation.RESTART);
+                fadeIn.setRepeatCount(Animation.INFINITE);
+                dotImg.setAnimation(fadeIn);
+                timer = new Timer();
+                timer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                audioRecorderText.setText("0:" + audioTimerCount);
+                                audioTimerCount++;
+                            }
+                        });
+                    }
+                }, 0, 1000);
+                audioFileName = "/audio_" + Calendar.getInstance().getTimeInMillis() + ".3gp";
+                mRecorder = AppUtils.startRecording(mRecorder,this,this,audioFileName);
+            }
+        } else if(v.getId() == R.id.save_rec) {
+            if (timer != null) {
+                timer.cancel();
+                timer = null;
+            }
+            audioTimerCount = 0;
+            // stop the recording
+            if(mRecorder!=null) {
+                mRecorder.stop();
+                mRecorder.release();
+                mRecorder = null;
+                counter++;
+                NotesAudio audio = new NotesAudio();
+                audio.setAudioPath(audioFileName);
+                hybridList.add(audio);
+                adapter.setHybridList(hybridList);
+            }
+            findViewById(R.id.audio_recording_layout).setVisibility(View.GONE);
+            findViewById(R.id.mic_button).setVisibility(View.VISIBLE);
+        }
+        else if(v.getId() == R.id.cancel_rec) {
+            if (timer != null) {
+                timer.cancel();
+                timer = null;
+            }
+            //Cancel the recording
+            audioTimerCount = 0;
+            if(mRecorder!=null) {
+                mRecorder.stop();
+                mRecorder.release();
+                mRecorder = null;
+            }
+            findViewById(R.id.audio_recording_layout).setVisibility(View.GONE);
+            findViewById(R.id.mic_button).setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == pick_image) {
+            if (resultCode == Activity.RESULT_OK) {
+                try {
+                    NotesImage image = new NotesImage();
+                    image.setImagePath(RealFilePath.getPath(this, data.getData()));
+                    hybridList.add(image);
+                    adapter.setHybridList(hybridList);
+                    addNotesRV.scrollToPosition(addNotesRV.getBottom());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (requestCode == take_image) {
+            if (resultCode == Activity.RESULT_OK) {
+                NotesImage image = new NotesImage();
+                String imgName = "img_" + Calendar.getInstance().getTimeInMillis();
+                String imagePath = this.getFilesDir() + "/" + imgName + ".jpg";
+                image.setImagePath(imagePath);
+                Bundle extras = data.getExtras();
+                bitmap = (Bitmap) extras.get("data");
+                AppUtils.persistImage(this,bitmap, imgName);
+                hybridList.add(image);
+                adapter.setHybridList(hybridList);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CAMERA_ACCESS_PERMISSION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    getImageFromCamera();
+                }
+                break;
+            case REQUEST_AUDIO_PERMISSION_CODE:
+                if (grantResults.length > 0) {
+                    boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    boolean permissionToStore = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+
+                    if (permissionToRecord && permissionToStore) {
+                        Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     @Override
@@ -179,5 +427,36 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         isNewCategoryCreated = true;
         this.categoryList = updatedCategory;
         this.selectedCategoryPos = updatedCategory.size() - 1;
+    }
+
+    private void getImageFromCamera() {
+        Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePicture.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePicture, take_image);
+        }
+    }
+
+    private void getImageFromGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), pick_image);
+        }
+    }
+
+    private void showPictureDialog() {
+        ImageSourceBSFrag fragment = new ImageSourceBSFrag(listener);
+        fragment.show(getSupportFragmentManager(),fragment.getTag());
+    }
+
+    @Override
+    public void onImageSourceSelection(boolean isCamera) {
+        if(isCamera) {
+            getImageFromCamera();
+        } else {
+            getImageFromGallery();
+        }
     }
 }
