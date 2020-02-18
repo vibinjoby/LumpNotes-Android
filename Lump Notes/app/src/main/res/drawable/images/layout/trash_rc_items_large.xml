@@ -20,6 +20,16 @@
         android:orientation="vertical"
         android:paddingTop="30dp">
 
+        <Button
+            android:id="@+id/delete_note_trash_btn"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:background="@raw/menu"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginRight="10dp"
+            />
+
         <ImageView
             android:id="@+id/large_trash_ic"
             android:layout_width="93dp"

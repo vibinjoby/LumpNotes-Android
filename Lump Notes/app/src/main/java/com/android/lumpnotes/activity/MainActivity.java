@@ -421,6 +421,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                                     dialog.dismiss();
                                     new DBHelper(MainActivity.this).deleteNotes(deletedNotes);
                                     adapter.setDeleteNotes(null);
+                                    AppUtils.showToastMessage(MainActivity.this,"All the notes in Trash are cleared",true);
                                 }
                             })
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

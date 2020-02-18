@@ -1,6 +1,7 @@
 package com.android.lumpnotes.adapters;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,9 +9,11 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.lumpnotes.R;
+import com.android.lumpnotes.activity.MainActivity;
 import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
@@ -39,20 +42,24 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public class SmallNotesViewHolder extends RecyclerView.ViewHolder {
         private TextView notesTitle;
         private Button recoverButton;
+        private Button deleteButton;
         public SmallNotesViewHolder(@NonNull View itemView) {
             super(itemView);
             notesTitle = itemView.findViewById(R.id.small_title_txt);
             recoverButton = itemView.findViewById(R.id.recover_button);
+            deleteButton = itemView.findViewById(R.id.delete_note_trash_btn);
         }
     }
 
     public class LargeNotesViewHolder extends RecyclerView.ViewHolder{
         private TextView notesTitle;
         private Button recoverButton;
+        private Button deleteButton;
         public LargeNotesViewHolder(@NonNull View itemView) {
             super(itemView);
             notesTitle = itemView.findViewById(R.id.large_title_txt);
             recoverButton = itemView.findViewById(R.id.recover_button);
+            deleteButton = itemView.findViewById(R.id.delete_note_trash_btn);
         }
     }
     @NonNull
@@ -87,6 +94,12 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         if(getItemViewType(position) == SMALL_VIEW_TYPE){
             ((SmallNotesViewHolder)holder).notesTitle.setText(deleteNotes.get(position).getNoteTitle());
+            ((SmallNotesViewHolder)holder).deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onDeleteClickAction(position);
+                }
+            });
             ((SmallNotesViewHolder)holder).recoverButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -95,6 +108,12 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             });
         } else {
             ((LargeNotesViewHolder)holder).notesTitle.setText(deleteNotes.get(position).getNoteTitle());
+            ((LargeNotesViewHolder)holder).deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onDeleteClickAction(position);
+                }
+            });
             ((LargeNotesViewHolder)holder).recoverButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -116,6 +135,30 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             emptyDeleteView.setVisibility(View.VISIBLE);
         }
         return 0;
+    }
+
+    private void onDeleteClickAction(final int position) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.MyDialogTheme);
+        builder.setTitle("Are you sure you want to permanently delete this note ?");
+        builder.setMessage("This will be deleted immediately.You can’t undo this action.")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                        List<Notes> toBeDeleted = new ArrayList<>();
+                        toBeDeleted.add(deleteNotes.get(position));
+                        new DBHelper(context).deleteNotes(toBeDeleted);
+                        deleteNotes.remove(deleteNotes.get(position));
+                        notifyItemRemoved(position);
+                        AppUtils.showToastMessage(context,"Selected Note is deleted from trash",true);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        builder.create();
+        builder.show();
     }
 
     private void onRecoverClickAction(int position) {

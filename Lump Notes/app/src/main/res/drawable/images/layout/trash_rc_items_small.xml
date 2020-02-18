@@ -19,6 +19,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:id="@+id/delete_note_trash_btn"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:background="@raw/menu"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="10dp"
+        />
+
     <ImageView
         android:id="@+id/small_trash_ic"
         android:layout_width="55dp"
