@@ -226,8 +226,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 finish();
             }
         } else {
-            if ((notesTitle.getText()!=null && !notesTitle.getText().toString().isEmpty()) ||
-                    (hybridList.size() > 1))
+            if ((notesTitle.getText()!=null && !notesTitle.getText().toString().isEmpty()) )
              {
                 new AlertDialog.Builder(this)
                         .setTitle("Unsaved Changes")
@@ -246,10 +245,23 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                         .setNegativeButton("Save", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                int categoryId = -1;
                                 DBHelper dbHelper = new DBHelper(AddNotesActivity.this);
                                 String jsonObj = new Gson().toJson(hybridList);
-                                isInserted = dbHelper.saveNotes(notes.getNoteId(), notesTitle.getText().toString(),
-                                        isPinned, "" + latitude, "" + longitude, jsonObj);
+                                try {
+                                    if (selectedCategoryPos == -1) {
+                                        selectedCategoryPos = AppUtils.getUntitledCategoryIndex(categoryList);
+                                        if (selectedCategoryPos != -1) {
+                                            categoryId = categoryList.get(selectedCategoryPos).getCategoryId();
+                                        }
+                                    } else {
+                                        categoryId = categoryList.get(selectedCategoryPos).getCategoryId();
+                                    }
+                                    isInserted = dbHelper.saveNotes(categoryId, notesTitle.getText().toString(),
+                                            isPinned, "" + latitude, "" + longitude, jsonObj);
+                                } catch(Exception e) {
+                                    e.printStackTrace();
+                                }
                                 final Intent data = new Intent();
                                 data.putExtra("category_id", selectedCategoryPos);
                                 if (isFromPinnedPage) {
@@ -262,6 +274,8 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .show();
+            } else {
+                finish();
             }
             if (isNewCategoryCreated) {
                 Intent intent = new Intent();
@@ -271,9 +285,6 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                     mRecorder.release();
                     mRecorder = null;
                 }
-                finish();
-            } else {
-                super.onBackPressed();
             }
         }
     }
