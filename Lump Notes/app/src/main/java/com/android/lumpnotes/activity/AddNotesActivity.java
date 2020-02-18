@@ -226,6 +226,43 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 finish();
             }
         } else {
+            if ((notesTitle.getText()!=null && !notesTitle.getText().toString().isEmpty()) ||
+                    (hybridList.size() > 1))
+             {
+                new AlertDialog.Builder(this)
+                        .setTitle("Unsaved Changes")
+                        .setMessage("Are you sure you want to discard all the changes??")
+
+                        .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (mRecorder != null) {
+                                    mRecorder.stop();
+                                    mRecorder.release();
+                                    mRecorder = null;
+                                }
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("Save", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                DBHelper dbHelper = new DBHelper(AddNotesActivity.this);
+                                String jsonObj = new Gson().toJson(hybridList);
+                                isInserted = dbHelper.saveNotes(notes.getNoteId(), notesTitle.getText().toString(),
+                                        isPinned, "" + latitude, "" + longitude, jsonObj);
+                                final Intent data = new Intent();
+                                data.putExtra("category_id", selectedCategoryPos);
+                                if (isFromPinnedPage) {
+                                    data.putExtra("fromPinnedNotes", "Y");
+                                }
+                                setResult(Activity.RESULT_OK, data);
+                                AppUtils.showToastMessage(AddNotesActivity.this, "Notes Saved Successfully", true);
+                                finish();
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
             if (isNewCategoryCreated) {
                 Intent intent = new Intent();
                 setResult(Activity.RESULT_OK, intent);
@@ -417,12 +454,12 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CAMERA_ACCESS_PERMISSION:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults!=null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     showPictureDialog();
                 }
                 break;
             case REQUEST_AUDIO_PERMISSION_CODE:
-                if (grantResults.length > 0) {
+                if (grantResults!=null && grantResults.length > 0 ) {
                     boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean permissionToStore = grantResults[1] == PackageManager.PERMISSION_GRANTED;
 
@@ -434,7 +471,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 }
                 break;
             case REQUEST_MAP_ACCESS_PERMISSION:
-                if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if(grantResults!=null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     findLocation();
                 } else {
                     AppUtils.showToastMessage(this, "Map location permission denied", false);
