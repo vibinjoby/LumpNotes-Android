@@ -363,7 +363,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                     ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
-                AppUtils.showToastMessage(this, "Map location permission denied", false);
+                ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION}, REQUEST_MAP_ACCESS_PERMISSION);
             } else {
                 if (dialogFrag == null) {
                     if (isEditNote) {
@@ -432,8 +432,12 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 }
                 break;
             case REQUEST_MAP_ACCESS_PERMISSION:
-                findLocation();
-                break;
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    findLocation();
+                } else {
+                    AppUtils.showToastMessage(this, "Map location permission denied", false);
+                }
+                break
             case take_image:
                 getImageFromCamera();
                 break;
