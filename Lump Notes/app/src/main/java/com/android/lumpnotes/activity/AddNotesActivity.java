@@ -420,6 +420,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 audio.setAudioPath(audioFileName);
                 hybridList.add(audio);
                 adapter.setHybridList(hybridList);
+                addNotesRV.smoothScrollToPosition(hybridList.size());
             }
             findViewById(R.id.audio_recording_layout).setVisibility(View.GONE);
             findViewById(R.id.mic_button).setVisibility(View.VISIBLE);
@@ -473,7 +474,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                     image.setImagePath(RealFilePath.getPath(this, data.getData()));
                     hybridList.add(image);
                     adapter.setHybridList(hybridList);
-                    addNotesRV.scrollToPosition(addNotesRV.getBottom());
+                    addNotesRV.smoothScrollToPosition(hybridList.size());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -490,6 +491,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 AppUtils.persistImage(bitmap, imgName);
                 hybridList.add(image);
                 adapter.setHybridList(hybridList);
+                addNotesRV.smoothScrollToPosition(hybridList.size());
             }
         }
     }

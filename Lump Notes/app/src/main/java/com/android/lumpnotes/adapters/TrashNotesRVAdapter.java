@@ -206,6 +206,9 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     Category ctgry = iterator.next();
 
                     if ("untitled".equalsIgnoreCase(ctgry.getCategoryName())) {
+                        if(ctgry.getNotesList() == null) {
+                            ctgry.setNotesList(new ArrayList<Notes>());
+                        }
                         ctgry.getNotesList().add(deleteNotes.get(position));
                         isUntitledCategoryPresent = true;
                         deletedCategoryId = ctgry.getCategoryId();

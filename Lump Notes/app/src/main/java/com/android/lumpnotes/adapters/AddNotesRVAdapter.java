@@ -239,7 +239,7 @@ public class AddNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 @Override
                 public void onClick(View v) {
                     hybridList.remove(hybridList.get(position));
-                    notifyDataSetChanged();
+                    notifyItemRemoved(position);
                 }
             });
 
@@ -248,7 +248,7 @@ public class AddNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 @Override
                 public void onClick(View v) {
                     hybridList.remove(hybridList.get(position));
-                    notifyDataSetChanged();
+                    notifyItemRemoved(position);
                 }
             });
             File imgFile = new File(((NotesImage) hybridList.get(position)).getImagePath());
@@ -267,6 +267,6 @@ public class AddNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public void setHybridList(List hybridList) {
         this.hybridList = hybridList;
-        notifyDataSetChanged();
+        notifyItemInserted(hybridList.size());
     }
 }
