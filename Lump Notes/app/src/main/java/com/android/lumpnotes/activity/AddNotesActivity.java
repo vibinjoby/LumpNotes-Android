@@ -58,12 +58,14 @@ import java.util.TimerTask;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-public class AddNotesActivity extends AppCompatActivity implements View.OnClickListener, DialogFragmentActivityListener , ImageUploadClickListener {
+public class AddNotesActivity extends AppCompatActivity implements View.OnClickListener, DialogFragmentActivityListener, ImageUploadClickListener {
 
     Button backBtn;
-    Button locationBtn,shareBtn,pinnedBtn, saveButton;
+    Button locationBtn, shareBtn, pinnedBtn, saveButton;
     Button imageUploadBtn, audioBtn;
     EditText notesTitle;
     int selectedCategoryPos = -1;
@@ -93,7 +95,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     ImageView dotImg;
     TextView audioRecorderText;
     int audioTimerCount = 0;
-    Button cancelRecording,saveRecording;
+    Button cancelRecording, saveRecording;
     Timer timer;
     ImageUploadClickListener listener;
     MapDialogFrag dialogFrag = null;
@@ -110,26 +112,26 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         }
         listener = this;
 
-        if(getIntent().getExtras()!=null && getIntent().getExtras().get("fromPinnedNotes")!=null) {
+        if (getIntent().getExtras() != null && getIntent().getExtras().get("fromPinnedNotes") != null) {
             isFromPinnedPage = true;
         }
 
         //Getting addIntent
-        if(getIntent().getExtras().getString("isAddNote")!=null) {
+        if (getIntent().getExtras().getString("isAddNote") != null) {
             categoryList = new DBHelper(this).fetchAllCategories();
         }
         // Getting data for intent
-        if(getIntent().getExtras().getString("selectedNote")!=null) {
+        if (getIntent().getExtras().getString("selectedNote") != null) {
             String selectedNote = getIntent().getExtras().getString("selectedNote");
             notes = new Gson().fromJson(selectedNote, Notes.class);
-            if(notes.getHybridList()!=null) {
+            if (notes.getHybridList() != null) {
                 hybridList = AppUtils.fetchDeserializedHybridList(notes.getHybridList());
             }
         }
 
-        if(categoryList!=null ) {
-            ChooseCategoryDialogFrag dialog = new ChooseCategoryDialogFrag(categoryList,null,this);
-            dialog.show(getSupportFragmentManager(),dialog.getTag());
+        if (categoryList != null) {
+            ChooseCategoryDialogFrag dialog = new ChooseCategoryDialogFrag(categoryList, null, this);
+            dialog.show(getSupportFragmentManager(), dialog.getTag());
         }
 
         locationBtn = findViewById(R.id.location_button);
@@ -149,10 +151,10 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
 
         notesTitle = findViewById(R.id.notes_title);
 
-        if(notes != null) {
+        if (notes != null) {
             notesTitle.setText(notes.getNoteTitle());
             isEditNote = true;
-            if(notes.isPinned().equalsIgnoreCase("Y")) {
+            if (notes.isPinned().equalsIgnoreCase("Y")) {
                 isPinned = true;
                 findViewById(R.id.bookmark_button).setBackgroundResource(R.drawable.pinned_selected);
             } else {
@@ -171,7 +173,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         cancelRecording = findViewById(R.id.cancel_rec);
         saveRecording.setOnClickListener(this);
         cancelRecording.setOnClickListener(this);
-        if(!isEditNote) {
+        if (!isEditNote) {
             hybridList.add("");
         }
         adapter = new AddNotesRVAdapter(hybridList);
@@ -182,17 +184,17 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onBackPressed() {
-        if(isEditNote) {
-            if(!notes.getNoteTitle().equalsIgnoreCase(notesTitle.getText().toString()) ||
-                    (hybridList.size() != notes.getHybridList().size() )
-                ) {
+        if (isEditNote) {
+            if (!notes.getNoteTitle().equalsIgnoreCase(notesTitle.getText().toString()) ||
+                    (hybridList.size() != notes.getHybridList().size())
+            ) {
                 new AlertDialog.Builder(this)
                         .setTitle("Unsaved Changes")
                         .setMessage("Are you sure you want to discard all the changes??")
 
                         .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                if(mRecorder!=null) {
+                                if (mRecorder != null) {
                                     mRecorder.stop();
                                     mRecorder.release();
                                     mRecorder = null;
@@ -205,12 +207,12 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                             public void onClick(DialogInterface dialog, int which) {
                                 DBHelper dbHelper = new DBHelper(AddNotesActivity.this);
                                 String jsonObj = new Gson().toJson(hybridList);
-                                isInserted = dbHelper.editNotes(notes.getNoteId(),notesTitle.getText().toString(),
-                                        isPinned,""+latitude, ""+longitude,jsonObj);
+                                isInserted = dbHelper.editNotes(notes.getNoteId(), notesTitle.getText().toString(),
+                                        isPinned, "" + latitude, "" + longitude, jsonObj);
                                 final Intent data = new Intent();
                                 data.putExtra("category_id", selectedCategoryPos);
-                                if(isFromPinnedPage) {
-                                    data.putExtra("fromPinnedNotes","Y");
+                                if (isFromPinnedPage) {
+                                    data.putExtra("fromPinnedNotes", "Y");
                                 }
                                 setResult(Activity.RESULT_OK, data);
                                 AppUtils.showToastMessage(AddNotesActivity.this, "Notes edited Successfully", true);
@@ -240,14 +242,14 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.back_button) {
+        if (v.getId() == R.id.back_button) {
             onBackPressed();
-        } else if(v.getId() == R.id.save_button) {
-            if(notesTitle.getText()!=null && !notesTitle.getText().toString().isEmpty()) {
+        } else if (v.getId() == R.id.save_button) {
+            if (notesTitle.getText() != null && !notesTitle.getText().toString().isEmpty()) {
                 int categoryId = -1;
                 DBHelper dbHelper = new DBHelper(this);
                 //Identify the untitled category's index in the list
-                if(isEditNote) {
+                if (isEditNote) {
                     categoryId = notes.getCategoryId();
                 } else if (selectedCategoryPos == -1) {
                     selectedCategoryPos = AppUtils.getUntitledCategoryIndex(categoryList);
@@ -258,30 +260,30 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                     categoryId = categoryList.get(selectedCategoryPos).getCategoryId();
                 }
                 //If there is no untitled category created before we need to create a new one
-                if(isEditNote) {
+                if (isEditNote) {
                     String jsonObj = new Gson().toJson(hybridList);
-                    isInserted = dbHelper.editNotes(notes.getNoteId(),notesTitle.getText().toString(),
-                             isPinned,""+latitude, ""+longitude,jsonObj);
+                    isInserted = dbHelper.editNotes(notes.getNoteId(), notesTitle.getText().toString(),
+                            isPinned, "" + latitude, "" + longitude, jsonObj);
                 } else {
                     String jsonObj = new Gson().toJson(hybridList);
                     isInserted = dbHelper.saveNotes(categoryId, notesTitle.getText().toString(),
-                             isPinned,""+latitude, ""+longitude,jsonObj);
+                            isPinned, "" + latitude, "" + longitude, jsonObj);
                 }
                 if (isInserted) {
                     final Intent data = new Intent();
                     data.putExtra("category_id", selectedCategoryPos);
-                    if(isFromPinnedPage) {
-                        data.putExtra("fromPinnedNotes","Y");
+                    if (isFromPinnedPage) {
+                        data.putExtra("fromPinnedNotes", "Y");
                     }
                     setResult(Activity.RESULT_OK, data);
-                    if(categoryList!=null && selectedCategoryPos < categoryList.size() && selectedCategoryPos!=-1) {
-                        if(isEditNote) {
+                    if (categoryList != null && selectedCategoryPos < categoryList.size() && selectedCategoryPos != -1) {
+                        if (isEditNote) {
                             AppUtils.showToastMessage(this, "Notes edited Successfully in the " + categoryList.get(selectedCategoryPos).getCategoryName() + " Category", true);
                         } else {
                             AppUtils.showToastMessage(this, "Notes Saved Successfully in the " + categoryList.get(selectedCategoryPos).getCategoryName() + " Category", true);
                         }
                     } else {
-                        if(isEditNote) {
+                        if (isEditNote) {
                             AppUtils.showToastMessage(this, "Notes edited Successfully", true);
                         } else {
                             AppUtils.showToastMessage(this, "Notes Saved Successfully", true);
@@ -296,63 +298,39 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             } else {
                 notesTitle.setError("Title is mandatory for saving Note");
             }
-        } else if(v.getId() == R.id.bookmark_button) {
-            if(isPinned) {
+        } else if (v.getId() == R.id.bookmark_button) {
+            if (isPinned) {
                 v.findViewById(R.id.bookmark_button).setBackgroundResource(R.drawable.bookmark);
             } else {
                 v.findViewById(R.id.bookmark_button).setBackgroundResource(R.drawable.pinned_selected);
             }
             isPinned = !isPinned;
-        }
-        else if(v.getId()== R.id.image_upload_button) {
+        } else if (v.getId() == R.id.image_upload_button) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                     && ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
+                    != PackageManager.PERMISSION_GRANTED ) {
                 requestPermissions(new String[]{Manifest.permission.CAMERA},
                         REQUEST_CAMERA_ACCESS_PERMISSION);
             } else {
                 showPictureDialog();
             }
-        }
-        else if(v.getId()== R.id.mic_button) {
+        } else if (v.getId() == R.id.mic_button) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                     && ActivityCompat.checkSelfPermission(this, RECORD_AUDIO)
                     != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{RECORD_AUDIO},
+                requestPermissions(new String[]{RECORD_AUDIO,WRITE_EXTERNAL_STORAGE},
                         REQUEST_AUDIO_PERMISSION_CODE);
             } else {
-                findViewById(R.id.audio_recording_layout).setVisibility(View.VISIBLE);
-                findViewById(R.id.mic_button).setVisibility(View.GONE);
-                final Animation fadeIn = new AlphaAnimation(0, 1);
-                fadeIn.setInterpolator(new DecelerateInterpolator());
-                fadeIn.setDuration(1000);
-                fadeIn.setRepeatMode(Animation.RESTART);
-                fadeIn.setRepeatCount(Animation.INFINITE);
-                dotImg.setAnimation(fadeIn);
-                timer = new Timer();
-                timer.scheduleAtFixedRate(new TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                audioRecorderText.setText("0:" + audioTimerCount);
-                                audioTimerCount++;
-                            }
-                        });
-                    }
-                }, 0, 1000);
-                audioFileName = "/audio_" + Calendar.getInstance().getTimeInMillis() + ".3gp";
-                mRecorder = AppUtils.startRecording(mRecorder,this,this,audioFileName);
+                showAudioFunctionality();
             }
-        } else if(v.getId() == R.id.save_rec) {
+        } else if (v.getId() == R.id.save_rec) {
             if (timer != null) {
                 timer.cancel();
                 timer = null;
             }
             audioTimerCount = 0;
             // stop the recording
-            if(mRecorder!=null) {
+            if (mRecorder != null) {
                 mRecorder.stop();
                 mRecorder.release();
                 mRecorder = null;
@@ -364,22 +342,21 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             }
             findViewById(R.id.audio_recording_layout).setVisibility(View.GONE);
             findViewById(R.id.mic_button).setVisibility(View.VISIBLE);
-        }
-        else if(v.getId() == R.id.cancel_rec) {
+        } else if (v.getId() == R.id.cancel_rec) {
             if (timer != null) {
                 timer.cancel();
                 timer = null;
             }
             //Cancel the recording
             audioTimerCount = 0;
-            if(mRecorder!=null) {
+            if (mRecorder != null) {
                 mRecorder.stop();
                 mRecorder.release();
                 mRecorder = null;
             }
             findViewById(R.id.audio_recording_layout).setVisibility(View.GONE);
             findViewById(R.id.mic_button).setVisibility(View.VISIBLE);
-        } else if(v.getId() == R.id.location_button) {
+        } else if (v.getId() == R.id.location_button) {
             //Show toast message if map permission is denied
             if (ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
@@ -426,7 +403,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 image.setImagePath(imagePath);
                 Bundle extras = data.getExtras();
                 bitmap = (Bitmap) extras.get("data");
-                AppUtils.persistImage(this,bitmap, imgName);
+                AppUtils.persistImage(this, bitmap, imgName);
                 hybridList.add(image);
                 adapter.setHybridList(hybridList);
             }
@@ -438,7 +415,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         switch (requestCode) {
             case REQUEST_CAMERA_ACCESS_PERMISSION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getImageFromCamera();
+                    showPictureDialog();
                 }
                 break;
             case REQUEST_AUDIO_PERMISSION_CODE:
@@ -447,14 +424,18 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                     boolean permissionToStore = grantResults[1] == PackageManager.PERMISSION_GRANTED;
 
                     if (permissionToRecord && permissionToStore) {
-                        Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
+                        showAudioFunctionality();
                     } else {
-                        Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
+                        AppUtils.showToastMessage(getApplicationContext(),"Audio Permission denied",false);
                     }
                 }
                 break;
             case REQUEST_MAP_ACCESS_PERMISSION:
                 findLocation();
+                break;
+            case take_image:
+                getImageFromCamera();
+                break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -491,12 +472,12 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
 
     private void showPictureDialog() {
         ImageSourceBSFrag fragment = new ImageSourceBSFrag(listener);
-        fragment.show(getSupportFragmentManager(),fragment.getTag());
+        fragment.show(getSupportFragmentManager(), fragment.getTag());
     }
 
     @Override
     public void onImageSourceSelection(boolean isCamera) {
-        if(isCamera) {
+        if (isCamera) {
             getImageFromCamera();
         } else {
             getImageFromGallery();
@@ -510,13 +491,46 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                     @Override
                     public void onSuccess(Location location) {
                         if (location != null) {
-                            //longitude and latitude
-                            longitude = location.getLongitude();
-                            latitude = location.getLatitude();
-                            notes.setNoteLongitudeLoc(""+location.getLongitude());
-                            notes.setNoteLatitudeLoc(""+location.getLatitude());
+                            try {
+                                //longitude and latitude
+                                longitude = location.getLongitude();
+                                latitude = location.getLatitude();
+                                if (notes == null) {
+                                    notes = new Notes();
+                                }
+                                notes.setNoteLongitudeLoc("" + location.getLongitude());
+                                notes.setNoteLatitudeLoc("" + location.getLatitude());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 });
+    }
+
+    private void showAudioFunctionality() {
+        findViewById(R.id.audio_recording_layout).setVisibility(View.VISIBLE);
+        findViewById(R.id.mic_button).setVisibility(View.GONE);
+        final Animation fadeIn = new AlphaAnimation(0, 1);
+        fadeIn.setInterpolator(new DecelerateInterpolator());
+        fadeIn.setDuration(1000);
+        fadeIn.setRepeatMode(Animation.RESTART);
+        fadeIn.setRepeatCount(Animation.INFINITE);
+        dotImg.setAnimation(fadeIn);
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        audioRecorderText.setText("0:" + audioTimerCount);
+                        audioTimerCount++;
+                    }
+                });
+            }
+        }, 0, 1000);
+        audioFileName = "/audio_" + Calendar.getInstance().getTimeInMillis() + ".3gp";
+        mRecorder = AppUtils.startRecording(mRecorder, this, this, audioFileName);
     }
 }

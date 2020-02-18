@@ -1,5 +1,6 @@
 package com.android.lumpnotes.fragment;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,12 +9,19 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+
 import com.android.lumpnotes.R;
 import com.android.lumpnotes.adapters.BottomSelectionLVAdapter;
 import com.android.lumpnotes.listeners.ImageUploadClickListener;
+import com.android.lumpnotes.utils.AppUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+
 public class ImageSourceBSFrag extends BottomSheetDialogFragment {
+    private static final int REQUEST_GALLERY_ACCESS_PERMISSION = 8435;
     private ImageUploadClickListener listener;
     public ImageSourceBSFrag(ImageUploadClickListener listener) {
         this.listener = listener;
@@ -39,9 +47,15 @@ public class ImageSourceBSFrag extends BottomSheetDialogFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(position == 0) {
-                    dismiss();
-                    if(listener!=null) {
-                        listener.onImageSourceSelection(false);
+                    if(ActivityCompat.checkSelfPermission(getContext(),READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{READ_EXTERNAL_STORAGE},
+                                REQUEST_GALLERY_ACCESS_PERMISSION);
+                    } else {
+                        dismiss();
+                        if (listener != null) {
+                            listener.onImageSourceSelection(false);
+                        }
                     }
                 } else {
                     dismiss();
@@ -58,5 +72,19 @@ public class ImageSourceBSFrag extends BottomSheetDialogFragment {
             }
         });
         return view;
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_GALLERY_ACCESS_PERMISSION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    dismiss();
+                    if(listener!=null) {
+                        listener.onImageSourceSelection(false);
+                    }
+                } else {
+                    AppUtils.showToastMessage(getContext(),"Gallery Access permission denied",false);
+                }
+        }
     }
 }
