@@ -427,7 +427,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                     if (permissionToRecord && permissionToStore) {
                         showAudioFunctionality();
                     } else {
-                        AppUtils.showToastMessage(getApplicationContext(),"Audio Permission denied",false);
+                        AppUtils.showToastMessage(this,"Audio Permission denied",false);
                     }
                 }
                 break;
