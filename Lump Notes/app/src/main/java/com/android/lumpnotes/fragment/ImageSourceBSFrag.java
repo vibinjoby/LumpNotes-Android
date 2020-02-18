@@ -32,7 +32,7 @@ public class ImageSourceBSFrag extends BottomSheetDialogFragment {
         TextView tView = view.findViewById(R.id.headerTxt);
         tView.setText("Choose Source for the image");
         String[] selectionArr = {"From gallery","Capture Image"};
-        BottomSelectionLVAdapter adapter = new BottomSelectionLVAdapter(selectionArr,this.getContext(),getFragmentManager());
+        BottomSelectionLVAdapter adapter = new BottomSelectionLVAdapter(selectionArr,this.getContext(),getFragmentManager(),true);
         selectionListView.setAdapter(adapter);
 
         selectionListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

@@ -39,7 +39,7 @@ public class PlusButtonBSFragment extends BottomSheetDialogFragment {
         View view = inflater.inflate(R.layout.bottom_sheet_fragment, container, false);
         ListView selectionListView = view.findViewById(R.id.selectionList);
         String[] selectionList = {"New Category","New Note"};
-        BottomSelectionLVAdapter adapter = new BottomSelectionLVAdapter(selectionList,this.getContext(),fragManager);
+        BottomSelectionLVAdapter adapter = new BottomSelectionLVAdapter(selectionList,this.getContext(),fragManager,false);
         selectionListView.setAdapter(adapter);
 
         selectionListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

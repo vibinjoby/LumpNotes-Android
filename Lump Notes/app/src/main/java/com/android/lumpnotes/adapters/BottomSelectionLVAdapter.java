@@ -16,11 +16,13 @@ public class BottomSelectionLVAdapter extends BaseAdapter {
     String[] selectionArr;
     Context context;
     FragmentManager fragManager;
+    private boolean isImageFrag;
 
-    public BottomSelectionLVAdapter(String[] selectionArr, Context context, FragmentManager fragManager) {
+    public BottomSelectionLVAdapter(String[] selectionArr, Context context, FragmentManager fragManager,boolean isImageFrag) {
         this.selectionArr = selectionArr;
         this.context = context;
         this.fragManager = fragManager;
+        this.isImageFrag = isImageFrag;
     }
 
     @Override
@@ -45,10 +47,18 @@ public class BottomSelectionLVAdapter extends BaseAdapter {
         selectionTxt.setText(selectionArr[position]);
 
         ImageView selectionImg = convertView.findViewById(R.id.selectionIC);
-        if (position == 0) {
-            selectionImg.setImageResource(R.drawable.new_category_ic);
+        if(!isImageFrag) {
+            if (position == 0) {
+                selectionImg.setImageResource(R.drawable.new_category_ic);
+            } else {
+                selectionImg.setImageResource(R.drawable.new_note_ic);
+            }
         } else {
-            selectionImg.setImageResource(R.drawable.new_note_ic);
+            if (position == 0) {
+                selectionImg.setImageResource(R.drawable.gallery);
+            } else {
+                selectionImg.setImageResource(R.drawable.capture);
+            }
         }
         return convertView;
     }
