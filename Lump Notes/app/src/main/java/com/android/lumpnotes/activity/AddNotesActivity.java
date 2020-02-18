@@ -437,7 +437,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 } else {
                     AppUtils.showToastMessage(this, "Map location permission denied", false);
                 }
-                break
+                break;
             case take_image:
                 getImageFromCamera();
                 break;
