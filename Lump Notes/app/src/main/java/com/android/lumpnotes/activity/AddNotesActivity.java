@@ -11,6 +11,7 @@ import android.location.Location;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -50,8 +51,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -99,6 +103,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     Timer timer;
     ImageUploadClickListener listener;
     MapDialogFrag dialogFrag = null;
+    TextView createdTV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +146,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         pinnedBtn = findViewById(R.id.bookmark_button);
         saveButton = findViewById(R.id.save_button);
         backBtn = findViewById(R.id.back_button);
+        createdTV = findViewById(R.id.created_tv);
 
         backBtn.setOnClickListener(this);
         locationBtn.setOnClickListener(this);
@@ -177,6 +183,21 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         cancelRecording.setOnClickListener(this);
         if (!isEditNote) {
             hybridList.add("");
+            createdTV.setText("");
+        } else {
+            //Logic for the created time text at the notes footer
+            try {
+                if(notes!=null && notes.getNoteCreatedTimeStamp()!=null) {
+                    Date createdDate = new SimpleDateFormat("MM/dd/yyyy hh:mm a").parse(notes.getNoteCreatedTimeStamp());
+                    if(AppUtils.isToday(createdDate)){
+                        createdTV.setText("Created today at "+AppUtils.getTimefromTimeStamp(createdDate));
+                    } else {
+                        createdTV.setText("Created "+AppUtils.getDatefromTimeStamp(createdDate)+" at "+AppUtils.getTimefromTimeStamp(createdDate));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         adapter = new AddNotesRVAdapter(hybridList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -461,11 +482,12 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             if (resultCode == Activity.RESULT_OK) {
                 NotesImage image = new NotesImage();
                 String imgName = "img_" + Calendar.getInstance().getTimeInMillis();
-                String imagePath = this.getFilesDir() + "/" + imgName + ".jpg";
+                String imagePath = Environment.getExternalStorageDirectory() +
+                        File.separator + "Lumpnotes/Image" + File.separator + imgName + ".jpg";
                 image.setImagePath(imagePath);
                 Bundle extras = data.getExtras();
                 bitmap = (Bitmap) extras.get("data");
-                AppUtils.persistImage(this, bitmap, imgName);
+                AppUtils.persistImage(bitmap, imgName);
                 hybridList.add(image);
                 adapter.setHybridList(hybridList);
             }

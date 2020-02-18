@@ -177,11 +177,12 @@ public class AppUtils {
         ActivityCompat.requestPermissions(activity, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE}, REQUEST_AUDIO_PERMISSION_CODE);
     }
 
-    public static File persistImage(Context context,Bitmap bitmap, String name) {
-        File filesDir = context.getFilesDir();
-        File imageFile = new File(filesDir, name + ".jpg");
+    public static File persistImage(Bitmap bitmap, String name) {
+        checkImageFolderPath();
+        final File imageFile = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "Lumpnotes/Image", name + ".jpg");
 
-        OutputStream os;
+        OutputStream os = null;
         try {
             os = new FileOutputStream(imageFile);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
@@ -189,10 +190,44 @@ public class AppUtils {
             os.close();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if(os!=null) {
+                try {
+                    os.flush();
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
         }
 
         return imageFile;
     }
+
+    private static void checkMusicFolderPath() {
+        try {
+            File folder = new File(Environment.getExternalStorageDirectory() +
+                    File.separator + "Lumpnotes/Music");
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private static void checkImageFolderPath() {
+        try {
+            File folder = new File(Environment.getExternalStorageDirectory() +
+                    File.separator + "Lumpnotes/Image");
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static MediaRecorder startRecording(MediaRecorder mRecorder,Activity activity,Context context,String audioFileName) {
         if (CheckPermissions(context)) {
@@ -200,16 +235,19 @@ public class AppUtils {
             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            final File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), audioFileName);
+            checkMusicFolderPath();
+            final File outputFile = new File(Environment.getExternalStorageDirectory() +
+                    File.separator + "Lumpnotes/Music", audioFileName);
+
             outputFile.setWritable(true);
             mRecorder.setOutputFile(outputFile.getAbsolutePath());
             try {
                 mRecorder.prepare();
+                mRecorder.start();
             } catch (IOException e) {
+                AppUtils.showToastMessage(context,"Recording Failed",false);
                 e.printStackTrace();
             }
-            mRecorder.start();
-            Toast.makeText(context, "Recording Started", Toast.LENGTH_SHORT).show();
         } else {
             RequestPermissions(activity);
         }

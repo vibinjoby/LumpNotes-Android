@@ -1,6 +1,5 @@
 package com.android.lumpnotes.adapters;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
@@ -79,7 +78,8 @@ public class AddNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
 
         public void initializeMediaPlayer() {
-            final File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), fileName);
+            final File outputFile = new File(Environment.getExternalStorageDirectory() +
+                    File.separator + "Lumpnotes/Music", fileName);
             try {
                 mPlayer = new MediaPlayer();
                 mPlayer.setLooping(false);

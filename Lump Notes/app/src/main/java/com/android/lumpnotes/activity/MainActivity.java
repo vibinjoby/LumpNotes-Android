@@ -501,24 +501,30 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
     @Override
     public void onClick(View v) {
         if(notesRVAdapter!=null) {
-            List<Notes> notesList = notesRVAdapter.getNotesList();
-            if(isAscendingSort) {
-                Collections.sort(notesList, new Comparator<Notes>() {
+            try {
+                List<Notes> notesList = notesRVAdapter.getNotesList();
+                if (notesList != null && !notesList.isEmpty()) {
+                    if (isAscendingSort) {
+                        Collections.sort(notesList, new Comparator<Notes>() {
 
-                    public int compare(Notes o1, Notes o2) {
-                        return o2.getNoteCreatedTimeStamp().compareTo(o1.getNoteCreatedTimeStamp());
-                    }
-                });
-            } else {
-                Collections.sort(notesList, new Comparator<Notes>() {
+                            public int compare(Notes o1, Notes o2) {
+                                return o2.getNoteCreatedTimeStamp().compareTo(o1.getNoteCreatedTimeStamp());
+                            }
+                        });
+                    } else {
+                        Collections.sort(notesList, new Comparator<Notes>() {
 
-                    public int compare(Notes o1, Notes o2) {
-                        return o1.getNoteCreatedTimeStamp().compareTo(o2.getNoteCreatedTimeStamp());
+                            public int compare(Notes o1, Notes o2) {
+                                return o1.getNoteCreatedTimeStamp().compareTo(o2.getNoteCreatedTimeStamp());
+                            }
+                        });
                     }
-                });
+                }
+                notesRVAdapter.setNotesList(notesList);
+                isAscendingSort = !isAscendingSort;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            notesRVAdapter.setNotesList(notesList);
-            isAscendingSort = !isAscendingSort;
         }
     }
 
