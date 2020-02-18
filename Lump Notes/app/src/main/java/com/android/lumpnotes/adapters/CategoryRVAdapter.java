@@ -126,6 +126,7 @@ public class CategoryRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 public void onClick(View v) {
                     selectedCategory = position;
                     if(notesAdapterobj!=null) {
+                        notesAdapterobj.isSearchBarVisible = false;
                         notesAdapterobj.setNotesList(categoryList.get(position - 1).getNotesList());
                     }
                     notifyDataSetChanged();

@@ -26,6 +26,7 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.NotesRV_
     private List<Notes> notesList;
     private EmptyNotes emptyNotes;
     private Activity activity;
+    public boolean isSearchBarVisible = false;
 
     public static class NotesRV_VH extends RecyclerView.ViewHolder {
         public ImageView notesIcView;
@@ -87,12 +88,16 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.NotesRV_
         if(notesList!=null && !notesList.isEmpty()) {
             emptyNotes.getEmptyNotesView().setVisibility(View.GONE);
             emptyNotes.getSearchIcon().setVisibility(View.VISIBLE);
-            emptyNotes.getSearchTxt().setVisibility(View.VISIBLE);
+            if(!isSearchBarVisible) {
+                emptyNotes.getSearchTxt().setVisibility(View.VISIBLE);
+            }
             return notesList.size();
         } else {
             emptyNotes.getEmptyNotesView().setVisibility(View.VISIBLE);
             emptyNotes.getSearchIcon().setVisibility(View.GONE);
-            emptyNotes.getSearchTxt().setVisibility(View.GONE);
+            if(!isSearchBarVisible) {
+                emptyNotes.getSearchTxt().setVisibility(View.GONE);
+            }
             return 0;
         }
     }
@@ -100,5 +105,8 @@ public class NotesRVAdapter extends RecyclerView.Adapter<NotesRVAdapter.NotesRV_
     public void setNotesList(List<Notes> notesList) {
         this.notesList = notesList;
         notifyDataSetChanged();
+    }
+    public List<Notes> getNotesList() {
+        return notesList;
     }
 }

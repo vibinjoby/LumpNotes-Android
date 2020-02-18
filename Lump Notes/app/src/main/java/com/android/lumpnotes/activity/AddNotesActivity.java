@@ -109,6 +109,8 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION}, REQUEST_MAP_ACCESS_PERMISSION);
+        } else {
+            findLocation();
         }
         listener = this;
 
@@ -269,22 +271,31 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                                 }
                                 setResult(Activity.RESULT_OK, data);
                                 AppUtils.showToastMessage(AddNotesActivity.this, "Notes Saved Successfully", true);
+                                if (isNewCategoryCreated) {
+                                    Intent intent = new Intent();
+                                    setResult(Activity.RESULT_OK, intent);
+                                    if (mRecorder != null) {
+                                        mRecorder.stop();
+                                        mRecorder.release();
+                                        mRecorder = null;
+                                    }
+                                }
                                 finish();
                             }
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .show();
             } else {
-                finish();
-            }
-            if (isNewCategoryCreated) {
-                Intent intent = new Intent();
-                setResult(Activity.RESULT_OK, intent);
-                if (mRecorder != null) {
-                    mRecorder.stop();
-                    mRecorder.release();
-                    mRecorder = null;
+                if (isNewCategoryCreated) {
+                    Intent intent = new Intent();
+                    setResult(Activity.RESULT_OK, intent);
+                    if (mRecorder != null) {
+                        mRecorder.stop();
+                        mRecorder.release();
+                        mRecorder = null;
+                    }
                 }
+                finish();
             }
         }
     }

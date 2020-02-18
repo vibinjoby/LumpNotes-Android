@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,9 +38,12 @@ import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.utils.AppUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements DialogFragmentActivityListener {
+public class MainActivity extends AppCompatActivity implements DialogFragmentActivityListener, View.OnClickListener {
     private RecyclerView.LayoutManager layoutManager;
     private RecyclerView categoryRV;
     private CategoryRVAdapter categoryRVAdapter;
@@ -47,8 +52,9 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
     private RecyclerView notesRv;
     private Button addButton,sortButton;
     private View emptyNotesView;
-    private EditText searchTxt;
+    private EditText searchTxt,searchNotesTxt,searchCategoryTxt;
     private Button searchIcon;
+    boolean isAscendingSort = true;
     private List<Category> categoryList;
     private List<Notes> pinnedNotesList;
     private Notes movableNotesObj;
@@ -84,15 +90,51 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
         categoryRV = findViewById(R.id.category_rv);
         addButton = findViewById(R.id.addBtn);
         sortButton = findViewById(R.id.sort_notes_btn);
+        sortButton.setOnClickListener(this);
+        sortButton.bringToFront();
         emptyNotesView = findViewById(R.id.default_note);
         searchTxt = findViewById(R.id.notes_search_txt);
+        searchTxt.bringToFront();
         searchIcon = findViewById(R.id.notes_searchbtn);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         notesRv = findViewById(R.id.notes_rv);
         todayTxt = findViewById(R.id.todayTxt);
         yesterdayTxt = findViewById(R.id.yesterdayTxt);
         oldTxt = findViewById(R.id.oldTxt);
+        searchNotesTxt = findViewById(R.id.notes_search_txt);
+        searchNotesTxt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchNotes(searchNotesTxt.getText().toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        searchCategoryTxt = findViewById(R.id.category_search_txt);
+        searchCategoryTxt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchCategory(searchCategoryTxt.getText().toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         todayRV = findViewById(R.id.todayRV);
         yesterdayRV = findViewById(R.id.yesterdayRV);
         oldRV = findViewById(R.id.oldRV);
@@ -425,5 +467,85 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
     @Override
     public void onNewCategoryCreation(List<Category> updatedCategory) {
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(notesRVAdapter!=null) {
+            List<Notes> notesList = notesRVAdapter.getNotesList();
+            if(isAscendingSort) {
+                Collections.sort(notesList, new Comparator<Notes>() {
+
+                    public int compare(Notes o1, Notes o2) {
+                        return o2.getNoteCreatedTimeStamp().compareTo(o1.getNoteCreatedTimeStamp());
+                    }
+                });
+            } else {
+                Collections.sort(notesList, new Comparator<Notes>() {
+
+                    public int compare(Notes o1, Notes o2) {
+                        return o1.getNoteCreatedTimeStamp().compareTo(o2.getNoteCreatedTimeStamp());
+                    }
+                });
+            }
+            notesRVAdapter.setNotesList(notesList);
+            isAscendingSort = !isAscendingSort;
+        }
+    }
+
+    private void searchNotes(String searchTxt) {
+        if(categoryList!=null && categoryRVAdapter!=null) {
+            try {
+                List<Notes> filteredNotes = new ArrayList<>();
+                List<Notes> notesList = categoryList.get(categoryRVAdapter.selectedCategory-1).getNotesList();
+                notesRVAdapter.isSearchBarVisible = true;
+                if (searchTxt != null && !searchTxt.isEmpty()) {
+                    for (Notes notes : notesList) {
+                        if (notes.getNoteTitle().contains(searchTxt)) {
+                            filteredNotes.add(notes);
+                        }
+                    }
+                    notesRVAdapter.isSearchBarVisible = true;
+                    notesRVAdapter.setNotesList(filteredNotes);
+                } else {
+                    notesRVAdapter.setNotesList(notesList);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void searchCategory(String searchTxt) {
+        if (categoryList != null && categoryRVAdapter != null) {
+            try {
+                List<Category> filteredCategories = new ArrayList<>();
+                List<Category> tempCategoryList = new ArrayList<>();
+                tempCategoryList.addAll(categoryList);
+
+                if (searchTxt != null && !searchTxt.isEmpty()) {
+                    for (Category category : tempCategoryList) {
+                        if (category.getCategoryName().contains(searchTxt)) {
+                            filteredCategories.add(category);
+                        }
+                    }
+                    if(filteredCategories.size()>0) {
+                        categoryRVAdapter.selectedCategory = 1;
+                        notesRVAdapter.setNotesList(filteredCategories.get(0).getNotesList());
+                    } else {
+                        notesRVAdapter.setNotesList(null);
+                    }
+                    categoryRVAdapter.setItems(filteredCategories);
+                } else {
+                    categoryRVAdapter.setItems(categoryList);
+                    if(!categoryList.isEmpty()) {
+                        notesRVAdapter.setNotesList(categoryList.get(0).getNotesList());
+                    }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
