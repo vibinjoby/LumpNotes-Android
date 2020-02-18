@@ -376,7 +376,9 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                         dialogFrag = new MapDialogFrag(0, 0);
                     }
                 }
-                dialogFrag.show(getSupportFragmentManager(), dialogFrag.getTag());
+                if(!dialogFrag.isAdded()) {
+                    dialogFrag.show(getSupportFragmentManager(), dialogFrag.getTag());
+                }
             }
         }
     }
