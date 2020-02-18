@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import com.android.lumpnotes.adapters.AddNotesRVAdapter;
 import com.android.lumpnotes.dao.DBHelper;
 import com.android.lumpnotes.fragment.ChooseCategoryDialogFrag;
 import com.android.lumpnotes.fragment.ImageSourceBSFrag;
+import com.android.lumpnotes.fragment.MapDialogFrag;
 import com.android.lumpnotes.listeners.DialogFragmentActivityListener;
 import com.android.lumpnotes.listeners.ImageUploadClickListener;
 import com.android.lumpnotes.models.Category;
@@ -40,6 +42,12 @@ import com.android.lumpnotes.models.NotesAudio;
 import com.android.lumpnotes.models.NotesImage;
 import com.android.lumpnotes.utils.AppUtils;
 import com.android.lumpnotes.utils.RealFilePath;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -48,6 +56,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.RECORD_AUDIO;
 
 public class AddNotesActivity extends AppCompatActivity implements View.OnClickListener, DialogFragmentActivityListener , ImageUploadClickListener {
@@ -63,6 +73,8 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     boolean isPinned = false;
     boolean isFromPinnedPage = false;
     boolean isNewCategoryCreated = false;
+    double longitude;
+    double latitude;
 
     List<Category> categoryList = null;
 
@@ -71,6 +83,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     private final int take_image = 6352;
     private MediaRecorder mRecorder;
     private static final int REQUEST_CAMERA_ACCESS_PERMISSION = 5674;
+    private static final int REQUEST_MAP_ACCESS_PERMISSION = 123;
     private Bitmap bitmap;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
     private String audioFileName;
@@ -83,11 +96,18 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     Button cancelRecording,saveRecording;
     Timer timer;
     ImageUploadClickListener listener;
+    MapDialogFrag dialogFrag = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.notes_layout);
+        if (ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION}, REQUEST_MAP_ACCESS_PERMISSION);
+        }
         listener = this;
 
         if(getIntent().getExtras()!=null && getIntent().getExtras().get("fromPinnedNotes")!=null) {
@@ -164,7 +184,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     public void onBackPressed() {
         if(isEditNote) {
             if(!notes.getNoteTitle().equalsIgnoreCase(notesTitle.getText().toString()) ||
-                    !AppUtils.compareLists(hybridList,AppUtils.fetchDeserializedHybridList(notes.getHybridList()))
+                    (hybridList.size() != notes.getHybridList().size() )
                 ) {
                 new AlertDialog.Builder(this)
                         .setTitle("Unsaved Changes")
@@ -186,7 +206,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                                 DBHelper dbHelper = new DBHelper(AddNotesActivity.this);
                                 String jsonObj = new Gson().toJson(hybridList);
                                 isInserted = dbHelper.editNotes(notes.getNoteId(),notesTitle.getText().toString(),
-                                        isPinned,"27.2038", "77.5011",jsonObj);
+                                        isPinned,""+latitude, ""+longitude,jsonObj);
                                 final Intent data = new Intent();
                                 data.putExtra("category_id", selectedCategoryPos);
                                 if(isFromPinnedPage) {
@@ -241,11 +261,11 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 if(isEditNote) {
                     String jsonObj = new Gson().toJson(hybridList);
                     isInserted = dbHelper.editNotes(notes.getNoteId(),notesTitle.getText().toString(),
-                             isPinned,"27.2038", "77.5011",jsonObj);
+                             isPinned,""+latitude, ""+longitude,jsonObj);
                 } else {
                     String jsonObj = new Gson().toJson(hybridList);
                     isInserted = dbHelper.saveNotes(categoryId, notesTitle.getText().toString(),
-                             isPinned,"27.2038", "77.5011",jsonObj);
+                             isPinned,""+latitude, ""+longitude,jsonObj);
                 }
                 if (isInserted) {
                     final Intent data = new Intent();
@@ -359,6 +379,27 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             }
             findViewById(R.id.audio_recording_layout).setVisibility(View.GONE);
             findViewById(R.id.mic_button).setVisibility(View.VISIBLE);
+        } else if(v.getId() == R.id.location_button) {
+            //Show toast message if map permission is denied
+            if (ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                    ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                AppUtils.showToastMessage(this, "Map location permission denied", false);
+            } else {
+                if (dialogFrag == null) {
+                    if (isEditNote) {
+                        try {
+                            dialogFrag = new MapDialogFrag(Double.parseDouble(notes.getNoteLongitudeLoc()), Double.parseDouble(notes.getNoteLatitudeLoc()));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        dialogFrag = new MapDialogFrag(0, 0);
+                    }
+                }
+                dialogFrag.show(getSupportFragmentManager(), dialogFrag.getTag());
+            }
         }
     }
 
@@ -412,6 +453,8 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                     }
                 }
                 break;
+            case REQUEST_MAP_ACCESS_PERMISSION:
+                findLocation();
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -458,5 +501,22 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         } else {
             getImageFromGallery();
         }
+    }
+
+    private void findLocation() {
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            //longitude and latitude
+                            longitude = location.getLongitude();
+                            latitude = location.getLatitude();
+                            notes.setNoteLongitudeLoc(""+location.getLongitude());
+                            notes.setNoteLatitudeLoc(""+location.getLatitude());
+                        }
+                    }
+                });
     }
 }

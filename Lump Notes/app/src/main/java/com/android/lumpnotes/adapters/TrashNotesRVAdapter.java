@@ -16,6 +16,7 @@ import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
 import com.android.lumpnotes.utils.AppUtils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -144,7 +145,12 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     Category category = iterator.next();
 
                     if (category.getCategoryId() == deletedCategoryId) {
-                        category.getNotesList().add(deleteNotes.get(position));
+                        if(category.getNotesList()!=null) {
+                            category.getNotesList().add(deleteNotes.get(position));
+                        } else {
+                            category.setNotesList(new ArrayList<Notes>());
+                            category.getNotesList().add(deleteNotes.get(position));
+                        }
                         break;
                     }
                 }
