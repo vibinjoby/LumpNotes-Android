@@ -12,15 +12,11 @@ import androidx.annotation.Nullable;
 
 import com.android.lumpnotes.models.Category;
 import com.android.lumpnotes.models.Notes;
-import com.android.lumpnotes.models.NotesAudio;
-import com.android.lumpnotes.models.NotesImage;
 import com.android.lumpnotes.utils.AppUtils;
 import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
 
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;

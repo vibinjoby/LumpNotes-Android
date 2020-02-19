@@ -412,15 +412,19 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             audioTimerCount = 0;
             // stop the recording
             if (mRecorder != null) {
-                mRecorder.stop();
-                mRecorder.release();
-                mRecorder = null;
-                counter++;
-                NotesAudio audio = new NotesAudio();
-                audio.setAudioPath(audioFileName);
-                hybridList.add(audio);
-                adapter.setHybridList(hybridList);
-                addNotesRV.smoothScrollToPosition(hybridList.size());
+                try {
+                    mRecorder.stop();
+                    mRecorder.release();
+                    mRecorder = null;
+                    counter++;
+                    NotesAudio audio = new NotesAudio();
+                    audio.setAudioPath(audioFileName);
+                    hybridList.add(audio);
+                    adapter.setHybridList(hybridList);
+                    addNotesRV.smoothScrollToPosition(hybridList.size());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             findViewById(R.id.audio_recording_layout).setVisibility(View.GONE);
             findViewById(R.id.mic_button).setVisibility(View.VISIBLE);
