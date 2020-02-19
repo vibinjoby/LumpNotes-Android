@@ -390,7 +390,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                     && ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED ) {
-                requestPermissions(new String[]{Manifest.permission.CAMERA},
+                requestPermissions(new String[]{Manifest.permission.CAMERA,WRITE_EXTERNAL_STORAGE},
                         REQUEST_CAMERA_ACCESS_PERMISSION);
             } else {
                 showPictureDialog();

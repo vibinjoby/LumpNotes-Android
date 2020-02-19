@@ -150,8 +150,10 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             new DBHelper(context).deleteNotes(toBeDeleted);
                             deleteNotes.remove(deleteNotes.get(position));
                             notifyItemRemoved(position);
+                            notifyItemRangeChanged(position, getItemCount());
                             AppUtils.showToastMessage(context, "Selected Note is deleted from trash", true);
                         } catch (Exception e) {
+                            e.printStackTrace();
                             AppUtils.showToastMessage(context,e.getMessage(),false);
                         }
                     }
@@ -231,6 +233,7 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             }
             deleteNotes.remove(deleteNotes.get(position));
             notifyItemRemoved(position);
+            notifyItemRangeChanged(position, getItemCount());
             //Update it in the database
             if(dbHelper == null) {
                 dbHelper = new DBHelper(context);
