@@ -144,12 +144,16 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.dismiss();
-                        List<Notes> toBeDeleted = new ArrayList<>();
-                        toBeDeleted.add(deleteNotes.get(position));
-                        new DBHelper(context).deleteNotes(toBeDeleted);
-                        deleteNotes.remove(deleteNotes.get(position));
-                        notifyItemRemoved(position);
-                        AppUtils.showToastMessage(context,"Selected Note is deleted from trash",true);
+                        try {
+                            List<Notes> toBeDeleted = new ArrayList<>();
+                            toBeDeleted.add(deleteNotes.get(position));
+                            new DBHelper(context).deleteNotes(toBeDeleted);
+                            deleteNotes.remove(deleteNotes.get(position));
+                            notifyItemRemoved(position);
+                            AppUtils.showToastMessage(context, "Selected Note is deleted from trash", true);
+                        } catch (Exception e) {
+                            AppUtils.showToastMessage(context,e.getMessage(),false);
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -235,7 +239,7 @@ public class TrashNotesRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             categoryList = dbHelper.fetchAllCategories();
             AppUtils.showToastMessage(context,"Note moved to "+recoveredCategoryName+" Category",true);
         } catch (Exception e) {
-            e.printStackTrace();
+            AppUtils.showToastMessage(context,e.getMessage(),false);
         }
     }
 

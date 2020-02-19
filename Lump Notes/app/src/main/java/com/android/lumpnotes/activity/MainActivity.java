@@ -409,28 +409,50 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
         deleteNotesRV.setLayoutManager(layoutManager);
         deleteNotesRV.setAdapter(adapter);
 
+        final EditText searchDeletedNotes = findViewById(R.id.search_delete_bar);
+        searchDeletedNotes.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchDeletedNotes(searchDeletedNotes.getText().toString(),deletedNotes,adapter);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         clearAllTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(deletedNotes!=null && !deletedNotes.isEmpty()) {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.MyDialogTheme);
-                    builder.setTitle("Are you sure you want to permanently delete all the notes ?");
-                    builder.setMessage("This will be deleted immediately.You can’t undo this action.")
-                            .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.dismiss();
-                                    new DBHelper(MainActivity.this).deleteNotes(deletedNotes);
-                                    adapter.setDeleteNotes(null);
-                                    AppUtils.showToastMessage(MainActivity.this,"All the notes in Trash are cleared",true);
-                                }
-                            })
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                    builder.create();
-                    builder.show();
+                try {
+                    if (deletedNotes != null && !deletedNotes.isEmpty()) {
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.MyDialogTheme);
+                        builder.setTitle("Are you sure you want to permanently delete all the notes ?");
+                        builder.setMessage("This will be deleted immediately.You can’t undo this action.")
+                                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                        new DBHelper(MainActivity.this).deleteNotes(deletedNotes);
+                                        adapter.setDeleteNotes(null);
+                                        AppUtils.showToastMessage(MainActivity.this, "All the notes in Trash are cleared", true);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                        builder.create();
+                        builder.show();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -578,6 +600,28 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                     }
                 }
 
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void searchDeletedNotes(String searchTxt,List<Notes> deletedNotes,TrashNotesRVAdapter adapter) {
+        if(deletedNotes!=null && adapter!=null) {
+            try {
+                List<Notes> filteredNotes = new ArrayList<>();
+                List<Notes> deletedNotesList = new ArrayList<>();
+                deletedNotesList.addAll(deletedNotes);
+                if (searchTxt != null && !searchTxt.isEmpty()) {
+                    for (Notes notes : deletedNotesList) {
+                        if (notes.getNoteTitle().contains(searchTxt)) {
+                            filteredNotes.add(notes);
+                        }
+                    }
+                    adapter.setDeleteNotes(filteredNotes);
+                } else {
+                    adapter.setDeleteNotes(deletedNotes);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -326,7 +326,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         if (v.getId() == R.id.back_button) {
             onBackPressed();
         } else if (v.getId() == R.id.save_button) {
-            if (notesTitle.getText() != null && !notesTitle.getText().toString().isEmpty()) {
+            if (notesTitle.getText() != null && !notesTitle.getText().toString().trim().isEmpty()) {
                 int categoryId = -1;
                 DBHelper dbHelper = new DBHelper(this);
                 //Identify the untitled category's index in the list
