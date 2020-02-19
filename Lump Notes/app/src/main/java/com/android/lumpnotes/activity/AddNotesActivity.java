@@ -467,8 +467,8 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             }
         } else if (v.getId() == R.id.share_button) {
             boolean isImageAvail = false;
-            boolean isTextAvail = false;
             boolean isAudioAvail = false;
+            final List<String> textList = new ArrayList<>();
             final List<NotesAudio> audioList = new ArrayList<>();
             final List<NotesImage> imageList = new ArrayList<>();
             try {
@@ -480,6 +480,8 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                         } else if (o instanceof NotesImage) {
                             isImageAvail = true;
                             imageList.add((NotesImage) o);
+                        } else {
+                            textList.add((String) o);
                         }
                     }
                     if (isAudioAvail) {
@@ -550,6 +552,10 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                                 })
                                 .setIcon(android.R.drawable.ic_dialog_alert)
                                 .show();
+                    }
+
+                    if(!isImageAvail && !isAudioAvail) {
+                        AppUtils.showToastMessage(this,"No media content to share",false);
                     }
                 }
             } catch (Exception e) {

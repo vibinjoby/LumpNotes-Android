@@ -114,28 +114,32 @@ public class ChooseCategoryDialogFrag  extends DialogFragment implements TextWat
     }
     private void searchCategory(String searchTxt) {
         if(categoryList!=null && !categoryList.isEmpty()) {
-            List<Category> filteredCategories = new ArrayList<>();
-            List<Category> tempCategoryList = new ArrayList<>();
-            tempCategoryList.addAll(categoryList);
-            if (searchTxt != null && !searchTxt.isEmpty()) {
-                for (Category category : tempCategoryList) {
-                    if(ignoreCategoryPos == -1) {
-                        if (category.getCategoryName().contains(searchTxt)) {
-                            filteredCategories.add(category);
-                        }
-                    } else {
-                        if(category.getCategoryName().equalsIgnoreCase(categoryList.get(ignoreCategoryPos).getCategoryName())) {
-                            continue;
-                        } else if (category.getCategoryName().contains(searchTxt)) {
-                            filteredCategories.add(category);
+            try {
+                List<Category> filteredCategories = new ArrayList<>();
+                List<Category> tempCategoryList = new ArrayList<>();
+                tempCategoryList.addAll(categoryList);
+                if (searchTxt != null && !searchTxt.isEmpty()) {
+                    for (Category category : tempCategoryList) {
+                        if (ignoreCategoryPos == -1) {
+                            if (category.getCategoryName().toLowerCase().contains(searchTxt.toLowerCase())) {
+                                filteredCategories.add(category);
+                            }
+                        } else {
+                            if (category.getCategoryName().toLowerCase().equalsIgnoreCase(categoryList.get(ignoreCategoryPos).getCategoryName().toLowerCase())) {
+                                continue;
+                            } else if (category.getCategoryName().toLowerCase().contains(searchTxt.toLowerCase())) {
+                                filteredCategories.add(category);
+                            }
                         }
                     }
+                    adapter.ignoreCategoryPos = -1;
+                    adapter.setCategoryList(filteredCategories);
+                } else {
+                    adapter.ignoreCategoryPos = this.ignoreCategoryPos;
+                    adapter.setCategoryList(categoryList);
                 }
-                adapter.ignoreCategoryPos = -1;
-                adapter.setCategoryList(filteredCategories);
-            } else {
-                adapter.ignoreCategoryPos = this.ignoreCategoryPos;
-                adapter.setCategoryList(categoryList);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

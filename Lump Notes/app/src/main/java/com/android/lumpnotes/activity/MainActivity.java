@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                                             Notes noteObj = categoryList.get(selectedCategory - 1).getNotesList().get(viewHolder.getAdapterPosition());
                                             boolean isDeleted = new DBHelper(context).deleteRecoverNote(noteObj.getNoteId(), "Y");
                                             if (isDeleted) {
-                                                AppUtils.showToastMessage(context, "Note Deleted successfully", true);
+                                                AppUtils.showToastMessage(context, "Note Moved to trash successfully", true);
                                                 categoryList.get(selectedCategory - 1).getNotesList().remove(noteObj);
                                                 categoryRVAdapter.setItems(categoryList);
                                                 notesRVAdapter.setNotesList(categoryList.get(selectedCategory - 1).getNotesList());
@@ -558,7 +558,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                 notesRVAdapter.isSearchBarVisible = true;
                 if (searchTxt != null && !searchTxt.isEmpty()) {
                     for (Notes notes : notesList) {
-                        if (notes.getNoteTitle().contains(searchTxt)) {
+                        if (notes.getNoteTitle().toLowerCase().contains(searchTxt.toLowerCase())) {
                             filteredNotes.add(notes);
                         }
                     }
@@ -582,7 +582,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
 
                 if (searchTxt != null && !searchTxt.isEmpty()) {
                     for (Category category : tempCategoryList) {
-                        if (category.getCategoryName().contains(searchTxt)) {
+                        if (category.getCategoryName().toLowerCase().contains(searchTxt.toLowerCase())) {
                             filteredCategories.add(category);
                         }
                     }
@@ -614,7 +614,7 @@ public class MainActivity extends AppCompatActivity implements DialogFragmentAct
                 deletedNotesList.addAll(deletedNotes);
                 if (searchTxt != null && !searchTxt.isEmpty()) {
                     for (Notes notes : deletedNotesList) {
-                        if (notes.getNoteTitle().contains(searchTxt)) {
+                        if (notes.getNoteTitle().toLowerCase().contains(searchTxt.toLowerCase())) {
                             filteredNotes.add(notes);
                         }
                     }

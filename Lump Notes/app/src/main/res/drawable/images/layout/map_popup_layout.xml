@@ -43,7 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:background="#FFFFFF"
-        android:text="80 Forest Manor Rd, North York, ON M2J 1M6, Canada"
+        android:text="Not Found"
         android:textColor="#5EBD63"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/map"
