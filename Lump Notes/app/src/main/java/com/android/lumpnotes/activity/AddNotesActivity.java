@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -187,12 +188,12 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         } else {
             //Logic for the created time text at the notes footer
             try {
-                if(notes!=null && notes.getNoteCreatedTimeStamp()!=null) {
+                if (notes != null && notes.getNoteCreatedTimeStamp() != null) {
                     Date createdDate = new SimpleDateFormat("MM/dd/yyyy hh:mm a").parse(notes.getNoteCreatedTimeStamp());
-                    if(AppUtils.isToday(createdDate)){
-                        createdTV.setText("Created today at "+AppUtils.getTimefromTimeStamp(createdDate));
+                    if (AppUtils.isToday(createdDate)) {
+                        createdTV.setText("Created today at " + AppUtils.getTimefromTimeStamp(createdDate));
                     } else {
-                        createdTV.setText("Created "+AppUtils.getDatefromTimeStamp(createdDate)+" at "+AppUtils.getTimefromTimeStamp(createdDate));
+                        createdTV.setText("Created " + AppUtils.getDatefromTimeStamp(createdDate) + " at " + AppUtils.getTimefromTimeStamp(createdDate));
                     }
                 }
             } catch (Exception e) {
@@ -210,7 +211,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         if (isEditNote) {
             if (!notes.getNoteTitle().equalsIgnoreCase(notesTitle.getText().toString()) ||
                     (hybridList.size() != notes.getHybridList().size()) ||
-                            isPinned != (notes.isPinned().equalsIgnoreCase("Y")?true:false)
+                    isPinned != (notes.isPinned().equalsIgnoreCase("Y") ? true : false)
             ) {
                 new AlertDialog.Builder(this)
                         .setTitle("Unsaved Changes")
@@ -249,8 +250,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 finish();
             }
         } else {
-            if ((notesTitle.getText()!=null && !notesTitle.getText().toString().isEmpty()) )
-             {
+            if ((notesTitle.getText() != null && !notesTitle.getText().toString().isEmpty())) {
                 new AlertDialog.Builder(this)
                         .setTitle("Unsaved Changes")
                         .setMessage("Are you sure you want to discard all the changes??")
@@ -282,7 +282,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                                     }
                                     isInserted = dbHelper.saveNotes(categoryId, notesTitle.getText().toString(),
                                             isPinned, "" + latitude, "" + longitude, jsonObj);
-                                } catch(Exception e) {
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                                 final Intent data = new Intent();
@@ -389,8 +389,8 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
         } else if (v.getId() == R.id.image_upload_button) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                     && ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED ) {
-                requestPermissions(new String[]{Manifest.permission.CAMERA,WRITE_EXTERNAL_STORAGE},
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA, WRITE_EXTERNAL_STORAGE},
                         REQUEST_CAMERA_ACCESS_PERMISSION);
             } else {
                 showPictureDialog();
@@ -399,7 +399,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                     && ActivityCompat.checkSelfPermission(this, RECORD_AUDIO)
                     != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{RECORD_AUDIO,WRITE_EXTERNAL_STORAGE},
+                requestPermissions(new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE},
                         REQUEST_AUDIO_PERMISSION_CODE);
             } else {
                 showAudioFunctionality();
@@ -461,10 +461,102 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                         dialogFrag = new MapDialogFrag(0, 0);
                     }
                 }
-                if(!dialogFrag.isAdded()) {
+                if (!dialogFrag.isAdded()) {
                     dialogFrag.show(getSupportFragmentManager(), dialogFrag.getTag());
                 }
             }
+        } else if (v.getId() == R.id.share_button) {
+            boolean isImageAvail = false;
+            boolean isTextAvail = false;
+            boolean isAudioAvail = false;
+            final List<NotesAudio> audioList = new ArrayList<>();
+            final List<NotesImage> imageList = new ArrayList<>();
+            try {
+                if (hybridList != null && !hybridList.isEmpty()) {
+                    for (Object o : hybridList) {
+                        if (o instanceof NotesAudio) {
+                            isAudioAvail = true;
+                            audioList.add((NotesAudio) o);
+                        } else if (o instanceof NotesImage) {
+                            isImageAvail = true;
+                            imageList.add((NotesImage) o);
+                        }
+                    }
+                    if (isAudioAvail) {
+                        new AlertDialog.Builder(this)
+                                .setTitle("Share Audio")
+                                .setMessage("Do you want to share the recorded Audio?")
+
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        Intent share = new Intent(Intent.ACTION_SEND);
+                                        share.setType("audio/*");
+                                        ArrayList<Uri> files = new ArrayList<>();
+                                        for (NotesAudio audio : audioList) {
+                                            String sharePath = Environment.getExternalStorageDirectory() +
+                                                    File.separator + "Lumpnotes/Music"
+                                                    + audio.getAudioPath();
+                                            Uri uri = Uri.parse(sharePath);
+                                            files.add(uri);
+                                        }
+                                        share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                                        share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                        startActivity(Intent.createChooser(share, "Share Sound File"));
+                                    }
+                                })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int whichButton) {
+                                                dialog.dismiss();
+                                            }
+                                        };
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show();
+                    }
+                    if (isImageAvail) {
+                        new AlertDialog.Builder(this)
+                                .setTitle("Share Images")
+                                .setMessage("Do you want to share the recorded Image?")
+
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        Intent share = new Intent(Intent.ACTION_SEND);
+                                        share.setType("image/*");
+                                        ArrayList<Uri> files = new ArrayList<>();
+                                        for (NotesImage image : imageList) {
+                                            Uri uri = Uri.parse(image.getImagePath());
+                                            files.add(uri);
+                                        }
+                                        share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                                        share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                        startActivity(Intent.createChooser(share, "Share Image File"));
+                                    }
+                                })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int whichButton) {
+                                                dialog.dismiss();
+                                            }
+                                        };
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                AppUtils.showToastMessage(this,"Problem with sharing",false);
+            }
+
         }
     }
 
@@ -504,24 +596,24 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CAMERA_ACCESS_PERMISSION:
-                if (grantResults!=null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     showPictureDialog();
                 }
                 break;
             case REQUEST_AUDIO_PERMISSION_CODE:
-                if (grantResults!=null && grantResults.length > 0 ) {
+                if (grantResults != null && grantResults.length > 0) {
                     boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean permissionToStore = grantResults[1] == PackageManager.PERMISSION_GRANTED;
 
                     if (permissionToRecord && permissionToStore) {
                         showAudioFunctionality();
                     } else {
-                        AppUtils.showToastMessage(this,"Audio Permission denied",false);
+                        AppUtils.showToastMessage(this, "Audio Permission denied", false);
                     }
                 }
                 break;
             case REQUEST_MAP_ACCESS_PERMISSION:
-                if(grantResults!=null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     findLocation();
                 } else {
                     AppUtils.showToastMessage(this, "Map location permission denied", false);
@@ -624,7 +716,7 @@ public class AddNotesActivity extends AppCompatActivity implements View.OnClickL
                 });
             }
         }, 0, 1000);
-        audioFileName = "/audio_" + Calendar.getInstance().getTimeInMillis() + ".3gp";
+        audioFileName = "/audio_" + Calendar.getInstance().getTimeInMillis() + ".mp3";
         mRecorder = AppUtils.startRecording(mRecorder, this, this, audioFileName);
     }
 }
