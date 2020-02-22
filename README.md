@@ -1,2 +1,2 @@
 # LumpNotesAndroid
-![](lumpnotes.gif)
+![](lumpnotes1.gif)
